@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:speech_to_text/speech_to_text.dart' as stt;
+// ignore: import_of_legacy_library_into_null_safe
+import 'package:speech_recognition/speech_recognition.dart';
 
 void main() {
   runApp(const MyApp());
@@ -52,115 +53,167 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   TextEditingController msg = TextEditingController();
-  String answer = "Hello i'm me7rzeya";
-  stt.SpeechToText _speech=stt.SpeechToText();
-   String _text = 'Press the button and start speaking';
-  double _confidence = 1.0;
+  late SpeechRecognition _speechRecognition;
+  bool _isAvailable = false;
   bool _isListening = false;
- @override
+  String _currentLocale ="en-US";
+
+  String resultText = "";
+    String reponseText = "";
+
+  @override
   void initState() {
     super.initState();
-    _speech = stt.SpeechToText();
+    initSpeechRecognizer();
   }
+  Future<void> getrep(String txt) async{
+    print("ok");
+    var dataForm = {
+                             "message": txt,
+                           };
+var response = await Dio().post(
+                            "http://192.168.1.9:5050/predict",
+                            options: Options(
+                              headers: {
+                                Headers.contentTypeHeader: 'application/json',
+                                Headers.acceptHeader: 'application/json'
+                               },
+                             ),
+                             data: dataForm,
+                           
+                          );
+                     reponseText = response.data;    
+                        
+                        
+                        
+  }
+  void initSpeechRecognizer() async {
+    
+    _speechRecognition = SpeechRecognition();
+
+    _speechRecognition.setAvailabilityHandler(
+      (bool result) => setState(() => _isAvailable = result),
+    );
+
+    _speechRecognition.setRecognitionStartedHandler(
+      () => setState(() => _isListening = true),
+    );
+      
+    _speechRecognition.setRecognitionResultHandler(
+       (String speech) => setState(() => resultText = speech),
+     
+    );
+    _speechRecognition.setRecognitionCompleteHandler(
+      () => setState(() => _isListening = false),
+    );
+
+    _speechRecognition.activate().then(
+          (result) => setState(() => _isAvailable = result),
+        );
+  _speechRecognition.setCurrentLocaleHandler(
+(String locale) => setState(() => _currentLocale = locale));
+       
+  }
+
   @override
   Widget build(BuildContext context) {
-    final _formKey = GlobalKey<FormState>();
-
-    return MaterialApp(
-          TextEditingController,
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Voice chatbot'),
-          centerTitle: true,
-        ),
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(answer),
-            Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  TextFormField(
-                    decoration: const InputDecoration(
-                      icon: Icon(Icons.email),
-                      hintText: 'Enter your message',
-                      labelText: 'Message',
-                    ),
-                    controller: msg,
-                    validator: (message) {
-                      if (message!.isEmpty) {
-                        return 'Message required';
-                      }
-                      return null;
-                    },
-                  ),
-                  Container(
-                    padding: const EdgeInsets.only(left: 150.0, top: 40.0),
-                    child: ElevatedButton(
-                      onPressed: _listen,
-                  child: Icon(_isListening ? Icons.mic : Icons.mic_none),
-                      // onPressed: () async {
-                      //   if (_formKey.currentState!.validate()) {
-                        
-
-                      //     var dataForm = {
-                      //       "message": msg.text,
-                      //     };
-
-                      //     var response = await Dio().post(
-                      //       "http://192.168.1.9:5050/predict",
-                      //       options: Options(
-                      //         headers: {
-                      //           Headers.contentTypeHeader: 'application/json',
-                      //           Headers.acceptHeader: 'application/json'
-                      //         },
-                      //       ),
-                      //       data: dataForm,
-                      //     );
-
-                      //     //Return response
-                      //     if (response.statusCode == 200) {
-                      //       //Refresh answer
-                      //       setState(() {
-                      //         answer = response.data;
-                      //         msg.text = "";
-                      //       });
-                      //     }
-                      //   }
-                      // },
-                      // child: const Text('Submit'),
-                    ),
-                  ),
-                ],
+    return Scaffold(
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              FloatingActionButton(
+                child: const Icon(Icons.cancel),
+                mini: true,
+                backgroundColor: Colors.deepOrange,
+                onPressed: () {
+                  if (_isListening) {
+                    _speechRecognition.cancel().then(
+                          (result) => setState(() {
+                                _isListening = result;
+                                resultText = "";
+                                reponseText ="";
+                              }),
+                        );
+                  }
+                },
               ),
+              FloatingActionButton(
+                child: const Icon(Icons.mic),
+                onPressed: ()  {
+                  if (_isAvailable && !_isListening) {
+                    _speechRecognition
+                        .listen(locale:_currentLocale)
+                        // ignore: avoid_print
+                        .then((result) => print('$result'));
+                
+                  
+                  }
+                },
+                backgroundColor: Colors.pink,
+              ),
+              FloatingActionButton(
+                // ignore: prefer_const_constructors
+                child: Icon(Icons.stop),
+                mini: true,
+                backgroundColor: Colors.deepPurple,
+                onPressed: ()  {
+                                    getrep(resultText);
+
+                  if (_isListening) {
+                     
+                    _speechRecognition.stop().then(
+                          (result) => setState(() => _isListening = result),             
+                        );
+
+                  }
+                  
+                },
+                
+              ),
+            
+            ],
+          ),
+          Container(
+            width: MediaQuery.of(context).size.width * 0.8,
+            decoration: BoxDecoration(
+              color: Colors.cyanAccent[100],
+              borderRadius: BorderRadius.circular(6.0),
             ),
-          ],
-        ),
+            // ignore: prefer_const_constructors
+            padding: EdgeInsets.symmetric(
+              vertical: 8.0,
+              horizontal: 12.0,
+            ),
+            child: Text(
+              resultText,
+              style: const TextStyle(fontSize: 24.0),
+            ),
+           
+          ),
+        Container(
+            width: MediaQuery.of(context).size.width * 0.8,
+            decoration: BoxDecoration(
+              color: Colors.cyanAccent[100],
+              borderRadius: BorderRadius.circular(6.0),
+            ),
+            // ignore: prefer_const_constructors
+            padding: EdgeInsets.symmetric(
+              vertical: 8.0,
+              horizontal: 12.0,
+            ),
+            child: Text(
+               reponseText,
+              style: const TextStyle(fontSize: 24.0),
+              
+            ),
+           
+          )
+        ],
       ),
     );
-  }
-  void _listen() async {
-    if (!_isListening) {
-      bool available = await _speech.initialize(
-        onStatus: (val) => print('onStatus: $val'),
-        onError: (val) => print('onError: $val'),
-      );
-      if (available) {
-        setState(() => _isListening = true);
-        _speech.listen(
-          onResult: (val) => setState(() {
-            _text = val.recognizedWords;
-            if (val.hasConfidenceRating && val.confidence > 0) {
-              _confidence = val.confidence;
-            }
-          }),
-        );
-      }
-    } else {
-      setState(() => _isListening = false);
-      _speech.stop();
-    }
   }
 }

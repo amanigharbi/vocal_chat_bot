@@ -30,7 +30,8 @@ dependencies:
   flutter:
     sdk: flutter
   dio: ^4.0.4
-  speech_to_text: ^2.3.0
+  speech_recognition: ^0.3.0
+
 
 
   # The following adds the Cupertino Icons font to your application.

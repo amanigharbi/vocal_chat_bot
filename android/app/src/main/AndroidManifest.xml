@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.vocal_chat_bot">
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
    <application
         android:label="vocal_chat_bot"
         android:name="${applicationName}"
