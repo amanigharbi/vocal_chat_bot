@@ -1,0 +1,64 @@
+{"intents": [
+        
+        {"tag": "salutation",
+         "patterns": ["Bonjour", "Comment vas tu", "Il y a quelqu'un?", "Salut", "Bonne journée"],
+         "responses": ["Bonjour merci pour la visite", "C'est bon de te revoir", "Salut, comment puis_je vous aider?"],
+         "context_set": ""
+        },
+        {"tag": "Au revoir",
+         "patterns": ["Au revoir", "A plus tard", "bye"],
+         "responses": ["A plus tard, Merci de votre visite", "Bonne journée", "Au revoir! reviens."]
+        },
+        {"tag": "Merci",
+         "patterns": ["Merci", "Merci beaucoup"],
+         "responses": ["Heureux de pouvoir vous aider!", "A toute heure!", "Mon plaisir"]
+        },
+        {"tag": "Heures",
+         "patterns": ["Quelles heures etes vous ouvert?", "Quelles sont vos heures?", "Quand etes vous ouvert?" ],
+         "responses": ["Nous sommes ouverts tous les jours de 9h à 17h", "Nos horaires sont de 9h à 21h tous les jours"]
+        },
+        
+        {"tag": "OuvertAujourdhui",
+         "patterns": ["Etes vous ouvert aujourd'hui?", "Quand ouvres tu aujourd'hui?", "Quelles sont vos heures aujourd'hui?"],
+         "responses": ["Nous sommes ouverts tous les jours de 9h à 17h", "Nos horaires sont de 9h à 17h tous les jours"]
+        },
+        {"tag": "wa9techt7elo",
+                "patterns": ["ma7lolin lyoum?", "wa9tech t7elo lyoum?", "chniya aw9at lyoum?"],
+                "responses": ["ma7loulin kol youm min 9h 7ata 17h", "aw9atna dima min 9h l 21h"]
+               },
+        {"tag": "aaslema",
+                "patterns": ["3aslema", "marhbe , fama chkoun lena?", "slm"],
+                "responses": ["mar7be bik kifch najmo n3awnouk?", "3aslema farhanin bwjoudek"]
+               },
+        {"tag": "تحية",
+                "patterns": ["مرحبا" , "كيف حالك" , "هل من أحد هناك؟" , "مرحبا" , "أتمنى لك يوما سعيدا"],
+                "responses": ["مرحبا شكرا على الزيارة", "سعيد لرؤيتك مرة أخرى" , "مرحبا "," كيف يمكنني مساعدتك؟"],
+                "context_set": ""
+               },
+        {"tag": "إلى اللقاء",
+         "patterns": ["وداعا" , "أراك لاحقا" , "وداعا"],
+         "responses": ["أراك لاحقا , شكرا لزيارتك" , "أتمنى لك يومًا سعيدا" , "وداعًا! تعال."]
+         },
+
+        {"tag": "شكرا لك",
+        "patterns": ["شكرا لك شكرا ","جزيلا لك"],
+         "responses": ["يسعدني أن أكون قادرًا على مساعدتك!" , "في أي وقت!" , "من دواعي سروري"]
+               },
+               
+         {"tag": "1تحية",
+                "patterns": ["مرحبا" , "كيف حالك" , "هل من أحد هناك؟" , "مرحبا" , "تنمنالك نهار باهي"],
+                "responses": ["كيفاش شكرا على الزيارة", "كيفاش لرؤيتك مرة أخرى" , "كيفاش "," كيفاش نجم نعاونك؟"],
+                "context_set": ""
+               },
+        {"tag": "Heures",
+         "patterns": ["Quelles heures etes vous ouvert?", "Quelles sont vos heures?", "Quand etes vous ouvert?" ],
+         "responses": ["Nous sommes ouverts tous les jours de 9h à 17h", "Nos horaires sont de 9h à 21h tous les jours"]
+        },
+               
+               {"tag": "OuvertAujourdhui",
+                "patterns": ["Etes vous ouvert aujourd'hui?", "Quand ouvres tu aujourd'hui?", "Quelles sont vos heures aujourd'hui?"],
+                "responses": ["Nous sommes ouverts tous les jours de 9h à 17h", "Nos horaires sont de 9h à 21h tous les jours"]
+               }
+        
+   ]
+}
