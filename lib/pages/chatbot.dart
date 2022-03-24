@@ -37,11 +37,13 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
   String url = '';
   String question = '';
   List<ChatMessage> chatMessage = [];
-  String mess ='';
+  String resultText ='';
+    String language ='';
 final FlutterTts flutterTts = FlutterTts();
   // static const String BOT_URL =
   //     "http://192.168.1.116:5000/chatbot"; // replace with server address
   final TextEditingController _queryController = TextEditingController();
+
 
   @override
   void initState() {
@@ -61,9 +63,10 @@ final FlutterTts flutterTts = FlutterTts();
     );
       
     _speechRecognition.setRecognitionResultHandler(
-       (String speech) => setState(() =>_queryController.text=speech),
+       (String speech) => setState(() =>resultText=speech),
      
     );
+     
 
     _speechRecognition.setRecognitionCompleteHandler(
       () => setState(() => _isListening= false),
@@ -83,6 +86,29 @@ final FlutterTts flutterTts = FlutterTts();
       appBar: ChatDetailPageAppBar(),
       body: Stack(
         children: <Widget>[
+            Container(
+            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(6.0),
+            ),
+            padding: const EdgeInsets.symmetric(
+              vertical: 8.0,
+              horizontal: 12.0,
+            ),
+                  child:  Visibility(
+                              child: Text(resultText,
+                              
+                              
+              ),
+                            
+                              maintainSize: true, 
+                              maintainAnimation: true,
+                              maintainState: true,
+                              visible: false, 
+                            ),
+                   ),
           Container(
             // ignore: prefer_const_constructors
             decoration: BoxDecoration(
@@ -90,8 +116,11 @@ final FlutterTts flutterTts = FlutterTts();
               image: DecorationImage(
                 image: const AssetImage('assets/images/chat.gif'),
                 fit: BoxFit.contain,
+                
+    
               ),
             ),
+            
             height: 580,
             // color: Colors.grey.shade300,
             child: AnimatedList(
@@ -107,6 +136,7 @@ final FlutterTts flutterTts = FlutterTts();
                     chatMessage: chatMessage[index],
                   );
                 }),
+                
           ),
           Align(
             alignment: Alignment.bottomLeft,
@@ -141,26 +171,45 @@ final FlutterTts flutterTts = FlutterTts();
                       },
                     ),
                   ),
-                  
+             
+            
                    IconButton(
                             icon: new Icon(Icons.mic), 
                              color: Colors.red.shade900,
                             onPressed: () { 
-                                if (_isAvailable && !_isListening) {
-                    _speechRecognition
-                        .listen(locale:_currentLocale)
-                        
+                      if (_isAvailable && !_isListening) {   
+                       
+      
+                      _speechRecognition
+                        .listen(locale:_currentLocale)                  
                         .then(
                           (result) => setState(() => _isListening = result));
                   }
-                    _getResponse(_queryController.text);
-                    print("hhh "+mess);
+                
+                  },
+),
+                               IconButton(
+                   icon: new  Icon(Icons.stop),
+               color: Colors.red.shade900,
+                onPressed: () {
+                  _getResponse(resultText);
+                  resultText ='';
+                  if (_isListening){
+                    _speechRecognition.stop()
+                    .then(
+                          (result) => setState(() => _isListening = result),
+                        );
+                }
+                
+           
+         
+                     
+    
                    },
                   
                      
                              ),
-               
-                  Align(
+                    Align(
                     alignment: Alignment.bottomRight,
                     child: Container(
                       width: 70,
@@ -173,28 +222,35 @@ final FlutterTts flutterTts = FlutterTts();
                       //   },
                       child: IconButton(
                          onPressed: () {
-                            //this._getResponse();
+                            _getResponse(_queryController.text);
+                            
                           },
                           color: Colors.red.shade900,
                           icon: new Icon(Icons.send)),
                       // backgroundColor: Colors.red.shade900,
                       // elevation: 0,
+             
                     ),
                   ),
+                 
                 ],
               ),
             ),
           ),
+          
         ],
       ),
     );
+    
   }
 
   Future<void> _getResponse(txt) async {
-    if (_queryController.text.isNotEmpty) {
+    // if (_queryController.text.isNotEmpty) {
+      if (txt.isNotEmpty){
       var dt = DateTime.now();
-      _insertSingleItem(_queryController.text, MessageType.Sender,
+      _insertSingleItem(txt, MessageType.Sender,
           DateFormat("HH:mm").format(DateTime.now()));
+        
       // var client = _getClient();
       try {
         // ignore: unused_local_variable
@@ -202,7 +258,7 @@ final FlutterTts flutterTts = FlutterTts();
                              "message": txt,
                            };
 var response = await Dio().post(
-                            "http://192.168.1.3:5050/predict",
+                            "http://192.168.1.16:5050/predict",
                             options: Options(
                               headers: {
                                 Headers.contentTypeHeader: 'application/json',
@@ -215,7 +271,7 @@ var response = await Dio().post(
 
         setState(() async {
           // data = await fetchdata(url);
-      //  await flutterTts.setLanguage("ar");
+        // await flutterTts.setLanguage("fr-CA");
          await flutterTts.speak(response.data);
           _insertSingleItem(response.data, MessageType.Receiver,
               DateFormat("HH:mm").format(DateTime.now()));
@@ -242,5 +298,9 @@ var response = await Dio().post(
         curve: Curves.ease,
       );
     });
+  }
+  void modifyLanguage(lang){
+    language = lang;
+
   }
 }
