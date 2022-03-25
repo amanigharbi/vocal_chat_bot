@@ -1,5 +1,7 @@
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:speech_to_text/speech_recognition_result.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 import 'package:vocal_chat_bot/components/chat_bubble.dart';
 import 'package:vocal_chat_bot/components/chat_detail_page.appbar.dart';
 import 'package:vocal_chat_bot/models/chat_message.dart';
@@ -32,53 +34,91 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
   late SpeechRecognition _speechRecognition;
   bool _isAvailable = false;
   bool _isListening = false;
-  String _currentLocale ="en-US";
+  String _currentLocale ="en_US";
 
   String url = '';
   String question = '';
   List<ChatMessage> chatMessage = [];
-  String resultText ='';
+  String _resultText ='';
     String language ='';
 final FlutterTts flutterTts = FlutterTts();
-  // static const String BOT_URL =
-  //     "http://192.168.1.116:5000/chatbot"; // replace with server address
+ SpeechToText _speechToText  = SpeechToText();
+ bool _speechEnabled = false;
+  String _currentLocaleId = '';
+  List<LocaleName> _localeNames = [];
   final TextEditingController _queryController = TextEditingController();
-
 
   @override
   void initState() {
-    super.initState();
-    initSpeechRecognizer();
+    super.initState(); 
+            
+        _initSpeech();
+
+    // initSpeechRecognizer();
   }
-   void initSpeechRecognizer() async {
+   void _initSpeech() async {
+    _speechEnabled = await _speechToText .initialize();
+     _localeNames = await _speechToText.locales();
+
+      var systemLocale = await _speechToText.systemLocale();
+      _currentLocaleId = systemLocale?.localeId ?? '';
+      print("lang id "+_currentLocale);
     
-    _speechRecognition = SpeechRecognition();
-
-    _speechRecognition.setAvailabilityHandler(
-      (bool result) => setState(() => _isAvailable = result),
-    );
-
-    _speechRecognition.setRecognitionStartedHandler(
-      () => setState(() => _isListening = true),
-    );
-      
-    _speechRecognition.setRecognitionResultHandler(
-       (String speech) => setState(() =>resultText=speech),
-     
-    );
-     
-
-    _speechRecognition.setRecognitionCompleteHandler(
-      () => setState(() => _isListening= false),
-    );
-
-    _speechRecognition.activate().then(
-          (result) => setState(() => _isAvailable = result),
-        );
-  _speechRecognition.setCurrentLocaleHandler(
-(String locale) => setState(() => _currentLocale = locale));
-       
+    setState(() {});
   }
+  void _switchLang(selectedVal) {
+    setState(() {
+      _currentLocaleId = selectedVal;
+    });
+    print("chang "+selectedVal);
+  }
+  void _startListening() async {
+ 
+    await _speechToText .listen(onResult: _onSpeechResult, localeId: _currentLocaleId,);
+  
+    
+    // setState(() {});
+  }
+ void _stopListening() async {
+    await _speechToText.stop();
+    // setState(() {});
+  }
+   void _onSpeechResult(SpeechRecognitionResult result) {
+    setState(() {
+      _getResponse(result.recognizedWords);
+      _resultText = result.recognizedWords;
+    
+    });
+  }
+//    void initSpeechRecognizer() async {
+    
+//     _speechRecognition = SpeechRecognition();
+
+//     _speechRecognition.setAvailabilityHandler(
+//       (bool result) => setState(() => _isAvailable = result),
+//     );
+
+//     _speechRecognition.setRecognitionStartedHandler(
+//       () => setState(() => _isListening = true),
+//     );
+      
+//     _speechRecognition.setRecognitionResultHandler(
+//        (String speech) => setState(() =>resultText=speech),
+     
+//     );
+     
+
+//     _speechRecognition.setRecognitionCompleteHandler(
+//       () => setState(() => _isListening= false),
+//     );
+
+//     _speechRecognition.activate().then(
+//           (result) => setState(() => _isAvailable = result),
+//         );
+// //   _speechRecognition.setCurrentLocaleHandler(
+// // (String locale) => setState(() => _currentLocale = locale));
+       
+//   }
 
   @override
   Widget build(BuildContext context) {
@@ -97,18 +137,23 @@ final FlutterTts flutterTts = FlutterTts();
               vertical: 8.0,
               horizontal: 12.0,
             ),
-                  child:  Visibility(
-                              child: Text(resultText,
+                   child:Visibility(
+                              child: Text(_resultText
+                              
+                              
                               
                               
               ),
+            
                             
                               maintainSize: true, 
                               maintainAnimation: true,
                               maintainState: true,
-                              visible: false, 
+                              visible: true, 
                             ),
                    ),
+           
+                   
           Container(
             // ignore: prefer_const_constructors
             decoration: BoxDecoration(
@@ -134,6 +179,7 @@ final FlutterTts flutterTts = FlutterTts();
                   // return _buildItem(_data[index], animation, index);
                   return ChatBubble(
                     chatMessage: chatMessage[index],
+                    
                   );
                 }),
                 
@@ -167,48 +213,48 @@ final FlutterTts flutterTts = FlutterTts();
                       controller: _queryController,
                       textInputAction: TextInputAction.send,
                       onSubmitted: (msg) {
-                        _getResponse(msg);
+                        _getResponse(msg);                        
                       },
                     ),
                   ),
              
             
                    IconButton(
-                            icon: new Icon(Icons.mic), 
+                            icon:  Icon(_speechToText.isNotListening ? Icons.mic_off : Icons.mic), 
                              color: Colors.red.shade900,
-                            onPressed: () { 
-                      if (_isAvailable && !_isListening) {   
-                       
-      
-                      _speechRecognition
-                        .listen(locale:_currentLocale)                  
-                        .then(
-                          (result) => setState(() => _isListening = result));
-                  }
-                
-                  },
+                            onPressed: _speechToText.isNotListening ? _startListening : _stopListening,
+     
+                 //     if (_isAvailable && !_isListening) {   
+                  //     _speechRecognition
+                  //       .listen(locale:'en_US')                  
+                  //       .then(
+                  //         (result) => setState(() => _isListening = result));
+                  // }
+                  
 ),
-                               IconButton(
-                   icon: new  Icon(Icons.stop),
-               color: Colors.red.shade900,
-                onPressed: () {
-                  _getResponse(resultText);
-                  resultText ='';
-                  if (_isListening){
-                    _speechRecognition.stop()
-                    .then(
-                          (result) => setState(() => _isListening = result),
-                        );
-                }
+              //                  IconButton(
+              //      icon:  const Icon(Icons.stop),
+              //  color: Colors.red.shade900,
+              //   onPressed: () {
+              //     _getResponse(resultText);
+              //     resultText ='';
+              //     print("language "+_currentLocale);
+                 
+              //     if (_isListening){
+              //       _speechRecognition.stop()
+              //       .then(
+              //             (result) => setState(() => _isListening = result),
+              //           );
+              //   }
                 
            
          
                      
     
-                   },
+              //      },
                   
                      
-                             ),
+              //                ),
                     Align(
                     alignment: Alignment.bottomRight,
                     child: Container(
@@ -275,7 +321,7 @@ var response = await Dio().post(
          await flutterTts.speak(response.data);
           _insertSingleItem(response.data, MessageType.Receiver,
               DateFormat("HH:mm").format(DateTime.now()));
-                 print(await flutterTts.getLanguages);
+                //  print(await flutterTts.getLanguages);
         });
       } catch (e) {
         // ignore: avoid_print
@@ -303,4 +349,6 @@ var response = await Dio().post(
     language = lang;
 
   }
+ 
+
 }

@@ -29,19 +29,19 @@ class _HeaderWidgetState extends State<HeaderWidget> {
         children: [
           ClipPath(
             child: Container(
-              decoration: new BoxDecoration(
-                gradient: new LinearGradient(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
                     colors: [
                       Colors.red.shade900.withOpacity(0.4),
                       Colors.red.shade800.withOpacity(0.4),
                     ],
                     begin: const FractionalOffset(0.0, 0.0),
                     end: const FractionalOffset(1.0, 0.0),
-                    stops: [0.0, 1.0],
+                    stops: const [0.0, 1.0],
                     tileMode: TileMode.clamp),
               ),
             ),
-            clipper: new ShapeClipper([
+            clipper: ShapeClipper([
               Offset(width / 5, _height),
               Offset(width / 10 * 5, _height - 60),
               Offset(width / 5 * 4, _height + 20),
@@ -50,19 +50,19 @@ class _HeaderWidgetState extends State<HeaderWidget> {
           ),
           ClipPath(
             child: Container(
-              decoration: new BoxDecoration(
-                gradient: new LinearGradient(
+              decoration: BoxDecoration(
+                gradient:  LinearGradient(
                     colors: [
                       Colors.red.shade900.withOpacity(0.4),
                       Colors.red.shade800.withOpacity(0.4),
                     ],
                     begin: const FractionalOffset(0.0, 0.0),
                     end: const FractionalOffset(1.0, 0.0),
-                    stops: [0.0, 1.0],
+                    stops: const [0.0, 1.0],
                     tileMode: TileMode.clamp),
               ),
             ),
-            clipper: new ShapeClipper([
+            clipper:  ShapeClipper([
               Offset(width / 3, _height + 20),
               Offset(width / 10 * 8, _height - 60),
               Offset(width / 5 * 4, _height - 60),
@@ -71,8 +71,8 @@ class _HeaderWidgetState extends State<HeaderWidget> {
           ),
           ClipPath(
             child: Container(
-              decoration: new BoxDecoration(
-                gradient: new LinearGradient(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
                     colors: [
                       //
                       Colors.red.shade900,
@@ -80,11 +80,11 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                     ],
                     begin: const FractionalOffset(0.0, 0.0),
                     end: const FractionalOffset(1.0, 0.0),
-                    stops: [0.0, 1.0],
+                    stops: const [0.0, 1.0],
                     tileMode: TileMode.clamp),
               ),
             ),
-            clipper: new ShapeClipper([
+            clipper: ShapeClipper([
               Offset(width / 5, _height),
               Offset(width / 2, _height - 40),
               Offset(width / 5 * 4, _height - 80),
@@ -93,12 +93,13 @@ class _HeaderWidgetState extends State<HeaderWidget> {
           ),
           Visibility(
             visible: _showIcon,
+            // ignore: sized_box_for_whitespace
             child: Container(
               height: _height - 40,
               child: Center(
                 child: Container(
-                  margin: EdgeInsets.all(20),
-                  padding: EdgeInsets.only(
+                  margin: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.only(
                     left: 5.0,
                     top: 20.0,
                     right: 5.0,
@@ -106,7 +107,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                   ),
                   decoration: BoxDecoration(
                     // borderRadius: BorderRadius.circular(20),
-                    borderRadius: BorderRadius.only(
+                    borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(100),
                       topRight: Radius.circular(100),
                       bottomLeft: Radius.circular(60),
@@ -134,7 +135,7 @@ class ShapeClipper extends CustomClipper<Path> {
   ShapeClipper(this._offsets);
   @override
   Path getClip(Size size) {
-    var path = new Path();
+    var path = Path();
 
     path.lineTo(0.0, size.height - 20);
 

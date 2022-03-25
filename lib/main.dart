@@ -1,7 +1,4 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-// ignore: import_of_legacy_library_into_null_safe
-import 'package:speech_recognition/speech_recognition.dart';
 import 'package:vocal_chat_bot/pages/chatbot.dart';
 
 
@@ -17,7 +14,6 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return MaterialApp(
-      TextEditingController,
       title: 'Flutter Demo',
       theme: ThemeData(
         // This is the theme of your application.
