@@ -1,3 +1,4 @@
+
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
@@ -11,7 +12,6 @@ import 'package:dio/dio.dart';
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:speech_recognition/speech_recognition.dart';
 import 'package:intl/intl.dart';
-
 
 enum MessageType {
   // ignore: constant_identifier_names
@@ -31,102 +31,70 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
   // ignore: unnecessary_new
   final ScrollController _listScrollController = new ScrollController();
   final GlobalKey<AnimatedListState> _listKey = GlobalKey();
-  late SpeechRecognition _speechRecognition;
-  bool _isAvailable = false;
-  bool _isListening = false;
-  String _currentLocale ="en_US";
-
   String url = '';
   String question = '';
   List<ChatMessage> chatMessage = [];
-  String _resultText ='';
-    String language ='';
-final FlutterTts flutterTts = FlutterTts();
- SpeechToText _speechToText  = SpeechToText();
- bool _speechEnabled = false;
-  String _currentLocaleId = '';
+  String _resultText = '';
+  final FlutterTts flutterTts = FlutterTts();
+  SpeechToText _speechToText = SpeechToText();
+  bool _speechEnabled = false;
+  String _currentLocaleId = "fr_CA";
   List<LocaleName> _localeNames = [];
   final TextEditingController _queryController = TextEditingController();
 
   @override
   void initState() {
-    super.initState(); 
-            
-        _initSpeech();
-
-    // initSpeechRecognizer();
+    super.initState();
+    _initSpeech();
   }
-   void _initSpeech() async {
-    _speechEnabled = await _speechToText .initialize();
-     _localeNames = await _speechToText.locales();
 
-      var systemLocale = await _speechToText.systemLocale();
-      _currentLocaleId = systemLocale?.localeId ?? '';
-      print("lang id "+_currentLocale);
-    
+  void _initSpeech() async {
+    _speechEnabled = await _speechToText.initialize();
+    _localeNames = await _speechToText.locales();
+
+    var systemLocale = await _speechToText.systemLocale();
+    //_currentLocaleId = systemLocale?.localeId ?? '';
+    //print("lang id " + _currentLocale);
+
     setState(() {});
   }
-  void _switchLang(selectedVal) {
-    setState(() {
-      _currentLocaleId = selectedVal;
-    });
-    print("chang "+selectedVal);
-  }
+
+  // void _switchLang(selectedVal) {
+  //   setState(() {
+  //     _currentLocaleId = selectedVal;
+  //   });
+  //   print("chang " + selectedVal);
+  // }
+
   void _startListening() async {
- 
-    await _speechToText .listen(onResult: _onSpeechResult, localeId: _currentLocaleId,);
-  
-    
-    // setState(() {});
+    await _speechToText.listen(
+      onResult: _onSpeechResult,
+      localeId: _currentLocaleId,
+    );
   }
- void _stopListening() async {
+
+  void _stopListening() async {
     await _speechToText.stop();
     // setState(() {});
   }
-   void _onSpeechResult(SpeechRecognitionResult result) {
+
+  void _onSpeechResult(SpeechRecognitionResult result) {
     setState(() {
-      _getResponse(result.recognizedWords);
-      _resultText = result.recognizedWords;
-    
+      if (_speechToText.isNotListening) {
+        _getResponse(result.recognizedWords);
+           _resultText = result.recognizedWords;
+      }
+   
     });
   }
-//    void initSpeechRecognizer() async {
-    
-//     _speechRecognition = SpeechRecognition();
-
-//     _speechRecognition.setAvailabilityHandler(
-//       (bool result) => setState(() => _isAvailable = result),
-//     );
-
-//     _speechRecognition.setRecognitionStartedHandler(
-//       () => setState(() => _isListening = true),
-//     );
-      
-//     _speechRecognition.setRecognitionResultHandler(
-//        (String speech) => setState(() =>resultText=speech),
-     
-//     );
-     
-
-//     _speechRecognition.setRecognitionCompleteHandler(
-//       () => setState(() => _isListening= false),
-//     );
-
-//     _speechRecognition.activate().then(
-//           (result) => setState(() => _isAvailable = result),
-//         );
-// //   _speechRecognition.setCurrentLocaleHandler(
-// // (String locale) => setState(() => _currentLocale = locale));
-       
-//   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: ChatDetailPageAppBar(),
+      appBar: const ChatDetailPageAppBar(),
       body: Stack(
         children: <Widget>[
-            Container(
+          Container(
             margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
             width: double.infinity,
             decoration: BoxDecoration(
@@ -137,23 +105,14 @@ final FlutterTts flutterTts = FlutterTts();
               vertical: 8.0,
               horizontal: 12.0,
             ),
-                   child:Visibility(
-                              child: Text(_resultText
-                              
-                              
-                              
-                              
-              ),
-            
-                            
-                              maintainSize: true, 
-                              maintainAnimation: true,
-                              maintainState: true,
-                              visible: true, 
-                            ),
-                   ),
-           
-                   
+            child: Visibility(
+              child: Text(_resultText),
+              maintainSize: true,
+              maintainAnimation: true,
+              maintainState: true,
+              visible: false,
+            ),
+          ),
           Container(
             // ignore: prefer_const_constructors
             decoration: BoxDecoration(
@@ -161,11 +120,9 @@ final FlutterTts flutterTts = FlutterTts();
               image: DecorationImage(
                 image: const AssetImage('assets/images/chat.gif'),
                 fit: BoxFit.contain,
-                
-    
               ),
             ),
-            
+
             height: 580,
             // color: Colors.grey.shade300,
             child: AnimatedList(
@@ -179,10 +136,69 @@ final FlutterTts flutterTts = FlutterTts();
                   // return _buildItem(_data[index], animation, index);
                   return ChatBubble(
                     chatMessage: chatMessage[index],
-                    
                   );
                 }),
-                
+          ),
+          Wrap(
+            children: <Widget>[
+              FlatButton(
+              color: Colors.red,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18.0)),
+              child: const Text('Arabic'),
+              onPressed: () {
+                 setState(() {
+                    _currentLocaleId = "ar_SA";
+                  });
+              },
+            ),
+                  FlatButton(
+              color: Colors.red,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18.0)),
+              child: const Text('French'),
+              onPressed: () {
+                  setState(() {
+                    _currentLocaleId = "fr_CA";
+                  });
+              },
+            ),
+                  FlatButton(
+              color: Colors.red,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18.0)),
+              child: const Text('English'),
+              onPressed: () {
+                setState(() {
+                    _currentLocaleId = "en_US";
+                  });
+              },
+            ),
+              // RaisedButton(
+              //   child: const Text('Arabic'),
+              //   onPressed: () {
+              //     setState(() {
+              //       _currentLocaleId = "ar_SA";
+              //     });
+              //   },
+              // ),
+              // RaisedButton(
+              //   child: const Text('French'),
+              //   onPressed: () {
+              //     setState(() {
+              //       _currentLocaleId = "fr_CA";
+              //     });
+              //   },
+              // ),
+              // RaisedButton(
+              //   child: const Text('English'),
+              //   onPressed: () {
+              //     setState(() {
+              //       _currentLocaleId = "en_US";
+              //     });
+              //   },
+              // ),
+            ],
           ),
           Align(
             alignment: Alignment.bottomLeft,
@@ -213,115 +229,85 @@ final FlutterTts flutterTts = FlutterTts();
                       controller: _queryController,
                       textInputAction: TextInputAction.send,
                       onSubmitted: (msg) {
-                        _getResponse(msg);                        
+                        _getResponse(msg);
                       },
                     ),
                   ),
-             
-            
-                   IconButton(
-                            icon:  Icon(_speechToText.isNotListening ? Icons.mic_off : Icons.mic), 
-                             color: Colors.red.shade900,
-                            onPressed: _speechToText.isNotListening ? _startListening : _stopListening,
-     
-                 //     if (_isAvailable && !_isListening) {   
-                  //     _speechRecognition
-                  //       .listen(locale:'en_US')                  
-                  //       .then(
-                  //         (result) => setState(() => _isListening = result));
-                  // }
-                  
-),
-              //                  IconButton(
-              //      icon:  const Icon(Icons.stop),
-              //  color: Colors.red.shade900,
-              //   onPressed: () {
-              //     _getResponse(resultText);
-              //     resultText ='';
-              //     print("language "+_currentLocale);
-                 
-              //     if (_isListening){
-              //       _speechRecognition.stop()
-              //       .then(
-              //             (result) => setState(() => _isListening = result),
-              //           );
-              //   }
-                
-           
-         
-                     
-    
-              //      },
-                  
-                     
-              //                ),
-                    Align(
+
+                  IconButton(
+                    icon: Icon(_speechToText.isNotListening
+                        ? Icons.mic_off
+                        : Icons.mic),
+                    color: Colors.red.shade900,
+                    onPressed: _speechToText.isNotListening
+                        ? _startListening
+                        : _stopListening,
+                  ),
+
+                  Align(
                     alignment: Alignment.bottomRight,
                     child: Container(
                       width: 70,
                       height: 70,
-                    
-                      // padding: EdgeInsets.only(right: 30, bottom: 0.1),
-                      // child: FloatingActionButton(
-                      //   onPressed: () {
-                      //     this._getResponse();
-                      //   },
                       child: IconButton(
-                         onPressed: () {
+                          onPressed: () {
                             _getResponse(_queryController.text);
-                            
                           },
                           color: Colors.red.shade900,
-                          icon: new Icon(Icons.send)),
+                          icon: const Icon(Icons.send)),
                       // backgroundColor: Colors.red.shade900,
                       // elevation: 0,
-             
                     ),
                   ),
-                 
                 ],
               ),
             ),
           ),
-          
         ],
       ),
     );
-    
   }
-
+Future<void> speak(message) async{
+  print("je suis la "+_currentLocaleId);
+  switch (_currentLocaleId) {
+    case 'ar_SA':
+      await flutterTts.setLanguage("ar");
+      break;
+       case 'fr_CA':
+      await flutterTts.setLanguage("fr_CA");
+      break;
+       case 'en_US':
+      await flutterTts.setLanguage("en_US");
+      break;
+    default:
+     await flutterTts.setLanguage("fr_CA");
+  }
+   await flutterTts.speak(message);
+}
   Future<void> _getResponse(txt) async {
-    // if (_queryController.text.isNotEmpty) {
-      if (txt.isNotEmpty){
-      var dt = DateTime.now();
-      _insertSingleItem(txt, MessageType.Sender,
-          DateFormat("HH:mm").format(DateTime.now()));
-        
-      // var client = _getClient();
+      _insertSingleItem(txt, MessageType.Sender, DateFormat("HH:mm").format(DateTime.now()));
       try {
-        // ignore: unused_local_variable
-      var dataForm = {
-                             "message": txt,
-                           };
-var response = await Dio().post(
-                            "http://192.168.1.16:5050/predict",
-                            options: Options(
-                              headers: {
-                                Headers.contentTypeHeader: 'application/json',
-                                Headers.acceptHeader: 'application/json'
-                               },
-                             ),
-                             data: dataForm,
-                           
-                          );
+        var dataForm = {
+          "message": txt,
+        };
+        var response = await Dio().post(
+          "http://192.168.1.16:5050/predict",
+          options: Options(
+            headers: {
+              Headers.contentTypeHeader: 'application/json',
+              Headers.acceptHeader: 'application/json'
+            },
+          ),
+          data: dataForm,
+        );
 
         setState(() async {
           // data = await fetchdata(url);
-        // await flutterTts.setLanguage("fr-CA");
-         await flutterTts.speak(response.data);
+          // await flutterTts.setLanguage("fr-CA");
+          speak(response.data);
           _insertSingleItem(response.data, MessageType.Receiver,
               DateFormat("HH:mm").format(DateTime.now()));
-                //  print(await flutterTts.getLanguages);
+          //  print(await flutterTts.getLanguages);
         });
       } catch (e) {
         // ignore: avoid_print
@@ -330,7 +316,7 @@ var response = await Dio().post(
         // client.close();
         _queryController.clear();
       }
-    }
+  
   }
 
   void _insertSingleItem(String message, MessageType type, String time) {
@@ -345,10 +331,5 @@ var response = await Dio().post(
       );
     });
   }
-  void modifyLanguage(lang){
-    language = lang;
-
-  }
  
-
 }

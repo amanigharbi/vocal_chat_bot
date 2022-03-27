@@ -58,6 +58,7 @@ class ChatDetailPageAppBar extends StatelessWidget
         ),
       ),
     );
+  
   }
 
   @override
