@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:vocal_chat_bot/pages/chatbot.dart';
 
 
+
 void main() {
   runApp(const MyApp());
 }
@@ -72,6 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
           );
         },
       ),
+   
             ],
           ),
          
@@ -79,4 +81,5 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+
 }

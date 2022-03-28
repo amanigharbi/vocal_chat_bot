@@ -1,11 +1,12 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:vocal_chat_bot/pages/chatbot.dart';
-
-class ChatMessage {
+ class VocalMessage{
   String message;
   MessageType type;
   String time;
-  bool text =true ;
-  ChatMessage({required this.message, required this.type, required this.time,required this.text});
+  VocalMessage({required this.message, required this.type, required this.time});
   String get getMsg {
     return message;
   }
@@ -17,5 +18,4 @@ class ChatMessage {
   String get getTime {
     return time;
   }
-  
-}
+ }

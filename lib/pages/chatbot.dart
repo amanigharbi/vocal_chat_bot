@@ -1,17 +1,19 @@
-
 // ignore: import_of_legacy_library_into_null_safe
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:vocal_chat_bot/components/chat_bubble.dart';
 import 'package:vocal_chat_bot/components/chat_detail_page.appbar.dart';
+import 'package:vocal_chat_bot/components/voice_buble.dart';
 import 'package:vocal_chat_bot/models/chat_message.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:dio/dio.dart';
-// ignore: import_of_legacy_library_into_null_safe
-import 'package:speech_recognition/speech_recognition.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:flag/flag.dart';
+import 'package:vocal_chat_bot/models/vocal_message.dart';
+
 
 enum MessageType {
   // ignore: constant_identifier_names
@@ -31,16 +33,16 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
   // ignore: unnecessary_new
   final ScrollController _listScrollController = new ScrollController();
   final GlobalKey<AnimatedListState> _listKey = GlobalKey();
-  String url = '';
-  String question = '';
   List<ChatMessage> chatMessage = [];
+    List<VocalMessage> vocalMessage = [];
   String _resultText = '';
   final FlutterTts flutterTts = FlutterTts();
-  SpeechToText _speechToText = SpeechToText();
+  final SpeechToText _speechToText = SpeechToText();
   bool _speechEnabled = false;
   String _currentLocaleId = "fr_CA";
   List<LocaleName> _localeNames = [];
   final TextEditingController _queryController = TextEditingController();
+  ValueNotifier<bool> isDialOpen = ValueNotifier(false);
 
   @override
   void initState() {
@@ -52,30 +54,21 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
     _speechEnabled = await _speechToText.initialize();
     _localeNames = await _speechToText.locales();
 
-    var systemLocale = await _speechToText.systemLocale();
-    //_currentLocaleId = systemLocale?.localeId ?? '';
-    //print("lang id " + _currentLocale);
 
     setState(() {});
   }
 
-  // void _switchLang(selectedVal) {
-  //   setState(() {
-  //     _currentLocaleId = selectedVal;
-  //   });
-  //   print("chang " + selectedVal);
-  // }
 
   void _startListening() async {
     await _speechToText.listen(
       onResult: _onSpeechResult,
       localeId: _currentLocaleId,
     );
+       print(' and here '+_currentLocaleId);
   }
 
   void _stopListening() async {
     await _speechToText.stop();
-    // setState(() {});
   }
 
   void _onSpeechResult(SpeechRecognitionResult result) {
@@ -90,7 +83,16 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+     return WillPopScope(
+      onWillPop: () async{
+          if(isDialOpen.value){
+            isDialOpen.value = false;
+            return false;
+          }else{
+            return true;
+          }
+      },
+    child: Scaffold(
       appBar: const ChatDetailPageAppBar(),
       body: Stack(
         children: <Widget>[
@@ -130,95 +132,88 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                 shrinkWrap: true,
                 // key to call remove and insert from anywhere
                 key: _listKey,
-                initialItemCount: chatMessage.length,
+                initialItemCount: vocalMessage.length,
                 itemBuilder: (BuildContext context, int index,
                     Animation<double> animation) {
                   // return _buildItem(_data[index], animation, index);
-                  return ChatBubble(
-                    chatMessage: chatMessage[index],
+                  return VoiceBubble(
+                    vocalMessage: vocalMessage[index],
                   );
                 }),
           ),
-          Wrap(
-            children: <Widget>[
-              FlatButton(
-              color: Colors.red,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18.0)),
-              child: const Text('Arabic'),
-              onPressed: () {
-                 setState(() {
-                    _currentLocaleId = "ar_SA";
-                  });
-              },
-            ),
-                  FlatButton(
-              color: Colors.red,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18.0)),
-              child: const Text('French'),
-              onPressed: () {
-                  setState(() {
+        
+           Align(
+            alignment: const FractionalOffset(1, 0.91),
+
+      child:SpeedDial(
+          animatedIcon: AnimatedIcons.menu_close,
+          openCloseDial: isDialOpen,
+          backgroundColor: Colors.red.shade900,
+          overlayColor: Colors.grey,
+          overlayOpacity: 0.5,
+          spacing: 15,
+          spaceBetweenChildren: 15,
+          closeManually: true,
+          children: [
+            SpeedDialChild(
+              child: Flag.fromCode(
+                FlagsCode.FR,
+                height: 30,
+                width: 30,
+            
+              ),
+              label: 'Francais',
+              backgroundColor: const Color.fromARGB(255, 207, 47, 47),
+              onTap: (){
+                setState(() {
                     _currentLocaleId = "fr_CA";
                   });
-              },
+                   print('here '+_currentLocaleId);
+              }
             ),
-                  FlatButton(
-              color: Colors.red,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18.0)),
-              child: const Text('English'),
-              onPressed: () {
-                setState(() {
+            SpeedDialChild(
+              child: Flag.fromCode(
+                FlagsCode.TN,
+                height: 30,
+                width: 30,
+              ),
+              label: 'Arabe',
+                onTap: (){
+                  setState(() {
+                    _currentLocaleId = "ar_SA";
+                  });
+                     print('here '+_currentLocaleId);
+                }
+            ),
+            SpeedDialChild(
+              child: Flag.fromCode(
+                FlagsCode.US,
+                height: 30,
+                width: 30,
+              ),
+              label: 'Anglais',
+                onTap: (){
+                  setState(() {
                     _currentLocaleId = "en_US";
                   });
-              },
+                  print('here '+_currentLocaleId);
+                }
             ),
-              // RaisedButton(
-              //   child: const Text('Arabic'),
-              //   onPressed: () {
-              //     setState(() {
-              //       _currentLocaleId = "ar_SA";
-              //     });
-              //   },
-              // ),
-              // RaisedButton(
-              //   child: const Text('French'),
-              //   onPressed: () {
-              //     setState(() {
-              //       _currentLocaleId = "fr_CA";
-              //     });
-              //   },
-              // ),
-              // RaisedButton(
-              //   child: const Text('English'),
-              //   onPressed: () {
-              //     setState(() {
-              //       _currentLocaleId = "en_US";
-              //     });
-              //   },
-              // ),
-            ],
-          ),
+          ],
+        ),
+           ),
+            
+          
+          
           Align(
             alignment: Alignment.bottomLeft,
             child: Container(
-              // decoration: BoxDecoration(
-              //   borderRadius: BorderRadius.only(
-              //     topRight: Radius.circular(10.0),
-              //     bottomRight: Radius.circular(10.0),
-              //   ),
-              // color: Colors.white
-              // ),
               padding: const EdgeInsets.only(left: 16, bottom: 5),
               height: 50,
               width: double.infinity,
               color: Colors.white,
               child: Row(
                 children: <Widget>[
-                  // SizedBox(
-                  //   width: 16,
-                  // ),
                   Expanded(
                     child: TextField(
                       decoration: InputDecoration(
@@ -255,8 +250,6 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                           },
                           color: Colors.red.shade900,
                           icon: const Icon(Icons.send)),
-                      // backgroundColor: Colors.red.shade900,
-                      // elevation: 0,
                     ),
                   ),
                 ],
@@ -265,7 +258,8 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
           ),
         ],
       ),
-    );
+    ),
+     );
   }
 Future<void> speak(message) async{
   print("je suis la "+_currentLocaleId);
@@ -291,7 +285,7 @@ Future<void> speak(message) async{
           "message": txt,
         };
         var response = await Dio().post(
-          "http://192.168.1.16:5050/predict",
+          "http://192.168.1.2:5050/predict",
           options: Options(
             headers: {
               Headers.contentTypeHeader: 'application/json',
@@ -302,26 +296,23 @@ Future<void> speak(message) async{
         );
 
         setState(() async {
-          // data = await fetchdata(url);
-          // await flutterTts.setLanguage("fr-CA");
-          speak(response.data);
+          await speak(response.data);
           _insertSingleItem(response.data, MessageType.Receiver,
               DateFormat("HH:mm").format(DateTime.now()));
-          //  print(await flutterTts.getLanguages);
         });
       } catch (e) {
         // ignore: avoid_print
         print("Failed -> $e");
       } finally {
-        // client.close();
+      
         _queryController.clear();
       }
   
   }
 
   void _insertSingleItem(String message, MessageType type, String time) {
-    chatMessage.add(ChatMessage(message: message, type: type, time: time));
-    _listKey.currentState!.insertItem(chatMessage.length - 1,
+    vocalMessage.add(VocalMessage(message: message, type: type, time: time));
+    _listKey.currentState!.insertItem(vocalMessage.length - 1,
         duration: const Duration(milliseconds: 200));
     Timer(const Duration(milliseconds: 220), () {
       _listScrollController.animateTo(
@@ -331,5 +322,6 @@ Future<void> speak(message) async{
       );
     });
   }
+
  
 }
