@@ -39,6 +39,9 @@ dependencies:
   speech_to_text: ^5.4.3
   flutter_speed_dial:  
   flag: ^6.0.0
+  wave: ^0.2.0
+  simple_wave: ^0.0.3
+ 
 
 dev_dependencies:
   flutter_test:
@@ -78,6 +81,7 @@ flutter:
     - assets/icons/
     - assets/images/
     - assets/svg/
+    - assets/svg/wave.svg
     - assets/chatbot.png
    
 
