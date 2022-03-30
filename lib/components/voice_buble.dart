@@ -76,11 +76,14 @@ class _VoiceBubbleState extends State<VoiceBubble> {
             ),
             // borderRadius: BorderRadius.all(Radius.circular(19.0))),
             child: Row(
+              
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 Flexible(
+                  
                     //We only want to wrap the text message with flexible widget
                     child: Container(
+                     
                   // child: Text(widget.vocalMessage.message,
                   //     style: TextStyle(
                   //         fontSize: 15.0,
@@ -89,14 +92,15 @@ class _VoiceBubbleState extends State<VoiceBubble> {
                   //             ? Colors.black
                   //             : Colors.white))
                   child: ElevatedButton.icon(
+                    
                     style: ElevatedButton.styleFrom(
-                        elevation: 40.0,
+                        elevation: 50.0,
                         // primary: widget.vocalMessage.type ==
                         //                           MessageType.Receiver
                         //                       ? Colors.grey[400]
                         //                       : Colors.red[900]),
                         primary: Colors.transparent),
-                    icon: Icon(Icons.play_arrow,
+                    icon: Icon(read == false ? Icons.play_arrow : Icons.pause,
                         color: widget.vocalMessage.type == MessageType.Receiver
                             ? Colors.black
                             : Colors.white),
@@ -104,6 +108,7 @@ class _VoiceBubbleState extends State<VoiceBubble> {
                         ? Container(
                             height: 50,
                             width: 100,
+                            
                             // child: SimpleWaveWidget(
                             //   waveWidth: 50, // this changes width of wave
                             //   waveHeight: 30, // this changes height of wave
@@ -119,15 +124,15 @@ class _VoiceBubbleState extends State<VoiceBubble> {
                             
       //user Stack() widget to overlap content and waves
       config: CustomConfig(
-        colors: [
-          widget.vocalMessage.type ==
-                                        MessageType.Receiver
-                                    ? Colors.black
-                                    : Colors.white
-      
+     
+      colors: [
+         widget.vocalMessage.type == MessageType.Receiver
+                            ? Colors.black54
+          :Colors.white.withOpacity(0.3),
+          
           //the more colors here, the more wave will be
         ],
-        durations: [3000],
+        durations: [4000],
         //durations of animations for each colors,
         // make numbers equal to numbers of colors
         heightPercentages: [0.01],
@@ -143,13 +148,13 @@ class _VoiceBubbleState extends State<VoiceBubble> {
         150.0,
         30.0,
       ),
-    
+      
     ),
                           )
                         : Text(
                             "Lire",
                             style: TextStyle(
-                                fontSize: 20,
+                                fontSize: 15,
                                 color: widget.vocalMessage.type ==
                                         MessageType.Receiver
                                     ? Colors.black
@@ -168,6 +173,7 @@ class _VoiceBubbleState extends State<VoiceBubble> {
                         });
                       });
                     },
+                    
                   ),
                 )),
                 const SizedBox(
@@ -203,59 +209,4 @@ class _VoiceBubbleState extends State<VoiceBubble> {
     );
   }
 
-  void _addCardWidget() {
-    setState(() {
-      _cardList.add(_card());
-      print("ok");
-    });
-  }
-
-  WaveWidget _card() {
-    return WaveWidget(
-      //user Stack() widget to overlap content and waves
-      config: CustomConfig(
-        colors: [
-          Colors.redAccent.withOpacity(0.3),
-          Colors.redAccent.withOpacity(0.3),
-          Colors.redAccent.withOpacity(0.3),
-          //the more colors here, the more wave will be
-        ],
-        durations: [4000, 5000, 7000],
-        //durations of animations for each colors,
-        // make numbers equal to numbers of colors
-        heightPercentages: [0.01, 0.05, 0.03],
-        //height percentage for each colors.
-        blur: const MaskFilter.blur(BlurStyle.solid, 5),
-        //blur intensity for waves
-      ),
-      waveAmplitude: 35.00, //depth of curves
-      waveFrequency: 3, //number of curves in waves
-      backgroundColor: Colors.white, //background colors
-      size: const Size(
-        double.infinity,
-        double.infinity,
-      ),
-    );
-  }
 }
-
-class SineCurve extends Curve {
-  final double count;
-
-  SineCurve({this.count = 3});
-
-  // t = x
-  @override
-  double transformInternal(double t) {
-    var val = sin(count * 2 * pi * t) * 0.5 + 0.5;
-    return val; //f(x)
-  }
-}
-// SimpleWaveWidget(
-//     waveWidth: 200, // this changes width of wave
-//     waveHeight: 300, // this changes height of wave
-//     waveColor: Colors.blue, // this changes color of wave
-//     amplitude: 300, // this changes height of wave
-//     waveMilliseconds: 5000, //this changes speed of wave
-//     numberOfWave: 10, //this changes number of waves
-// ),

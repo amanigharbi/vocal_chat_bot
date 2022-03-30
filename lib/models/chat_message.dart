@@ -4,8 +4,7 @@ class ChatMessage {
   String message;
   MessageType type;
   String time;
-  bool text =true ;
-  ChatMessage({required this.message, required this.type, required this.time,required this.text});
+  ChatMessage({required this.message, required this.type, required this.time});
   String get getMsg {
     return message;
   }

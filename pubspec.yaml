@@ -41,6 +41,8 @@ dependencies:
   flag: ^6.0.0
   wave: ^0.2.0
   simple_wave: ^0.0.3
+  circular_menu: ^1.2.3
+  flutter_arc_speed_dial: ^2.0.0
  
 
 dev_dependencies:

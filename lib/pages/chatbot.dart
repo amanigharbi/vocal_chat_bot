@@ -1,4 +1,6 @@
 // ignore: import_of_legacy_library_into_null_safe
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
@@ -223,9 +225,30 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                           ? Icons.mic_off
                           : Icons.mic),
                       color: Colors.red.shade900,
-                      onPressed: _speechToText.isNotListening
-                          ? _startListening
-                          : _stopListening,
+                      // onPressed: _speechToText.isNotListening
+                      //     ? _startListening
+                      //     : _stopListening,
+                     onPressed:()  => showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: const Text('Choix des langues'),
+          // content: const Text('AlertDialog description'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.pop(context, _currentLocaleId="en_US"),
+              child: const Text('Anglais'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, 'OK'),
+              child: const Text('Francais'),
+            ),
+              TextButton(
+              onPressed: () => Navigator.pop(context, 'OK'),
+              child: const Text('Arabe'),
+            ),
+          ],
+        ),
+                      ),
                     ),
                     Align(
                       alignment: Alignment.bottomRight,
