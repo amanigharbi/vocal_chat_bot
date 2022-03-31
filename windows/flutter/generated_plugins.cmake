@@ -3,7 +3,6 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  simple_wave
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)

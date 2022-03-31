@@ -1,11 +1,8 @@
-import 'dart:math';
-
 import 'package:vocal_chat_bot/models/vocal_message.dart';
 import 'package:vocal_chat_bot/pages/chatbot.dart';
 import 'package:flutter/material.dart';
 import 'package:wave/config.dart';
 import 'package:wave/wave.dart';
-import 'package:simple_wave/simple_wave.dart';
 
 class VoiceBubble extends StatefulWidget {
   VocalMessage vocalMessage;
@@ -29,15 +26,6 @@ class _VoiceBubbleState extends State<VoiceBubble> {
           : MainAxisAlignment.end,
       //this will determine if the message should be displayed left or right
       children: [
-        // Image(
-        //   alignment: Alignment.topRight,
-        //   image: widget.chatMessage.type == MessageType.Receiver
-        //       ? AssetImage('assets/images/chat.png')
-        //       : AssetImage("null"),
-        //   width: 30,
-        //   height: 30,
-        // ),
-
         Icon(
           widget.vocalMessage.type == MessageType.Receiver
               ? Icons.message_rounded
@@ -64,15 +52,7 @@ class _VoiceBubbleState extends State<VoiceBubble> {
                       topLeft: Radius.elliptical(25, 25),
                       bottomLeft: Radius.elliptical(25, 25),
                       bottomRight: Radius.elliptical(25, 25))),
-              // boxShadow: [
-              //   BoxShadow(
-              //     color: (widget.vocalMessage.type == MessageType.Receiver
-              //         ? Color(0XFFB0BEC5)
-              //         : Color(0xFFD50000)),
-              //     offset: Offset(5, 5),
-              //     blurRadius: 10,
-              //   ),
-              // ],
+         
             ),
             // borderRadius: BorderRadius.all(Radius.circular(19.0))),
             child: Row(
@@ -83,23 +63,11 @@ class _VoiceBubbleState extends State<VoiceBubble> {
                   
                     //We only want to wrap the text message with flexible widget
                     child: Container(
-                     
-                  // child: Text(widget.vocalMessage.message,
-                  //     style: TextStyle(
-                  //         fontSize: 15.0,
-                  //         color: widget.vocalMessage.type ==
-                  //                 MessageType.Receiver
-                  //             ? Colors.black
-                  //             : Colors.white))
                   height: 20,
                   child: ElevatedButton.icon(
                     
                     style: ElevatedButton.styleFrom(
                         elevation: 50.0,
-                        // primary: widget.vocalMessage.type ==
-                        //                           MessageType.Receiver
-                        //                       ? Colors.grey[400]
-                        //                       : Colors.red[900]),
                         primary: Colors.transparent),
                     icon: Icon(read == false ? Icons.play_arrow : Icons.pause,
                         color: widget.vocalMessage.type == MessageType.Receiver
@@ -109,17 +77,7 @@ class _VoiceBubbleState extends State<VoiceBubble> {
                         ? Container(
                             height: 40,
                             width: 100,
-                            
-                            // child: SimpleWaveWidget(
-                            //   waveWidth: 50, // this changes width of wave
-                            //   waveHeight: 30, // this changes height of wave
-                            //   waveColor: const Color.fromARGB(255, 31, 31,
-                            //       31), // this changes color of wave
-                            //   amplitude: 30, // this changes height of wave
-                            //   waveMilliseconds:
-                            //       5000, //this changes speed of wave
-                            //   numberOfWave: 10, //this changes number of waves
-                            // ),
+ 
                             alignment: Alignment.center,
                             child: WaveWidget(
                             

@@ -40,9 +40,7 @@ dependencies:
   flutter_speed_dial:  
   flag: ^6.0.0
   wave: ^0.2.0
-  simple_wave: ^0.0.3
-  circular_menu: ^1.2.3
-  flutter_arc_speed_dial: ^2.0.0
+
  
 
 dev_dependencies:
@@ -57,8 +55,7 @@ dev_dependencies:
   carousel_pro: ^1.0.0
   introduction_screen: any
   intl: ^0.17.0
-  flutter_sound: ^8.1.9
-  assets_audio_player: ^3.0.3+3
+
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

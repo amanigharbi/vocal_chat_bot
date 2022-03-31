@@ -65,7 +65,6 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
       onResult: _onSpeechResult,
       localeId: _currentLocaleId,
     );
-    print(' and here ' + _currentLocaleId);
   }
 
   void _stopListening() async {
@@ -184,7 +183,6 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                           _currentLocaleId = "fr_CA";
                           speak("Salut comment puis-je vous aider?");
                         });
-                        print('here ' + _currentLocaleId);
                       }),
                   SpeedDialChild(
                       child: Flag.fromCode(
@@ -198,7 +196,6 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                           _currentLocaleId = "ar_SA";
                           speak("مرحبا كيف يمكنني مساعدتك؟");
                         });
-                        print('here ' + _currentLocaleId);
                       }),
                   SpeedDialChild(
                       child: Flag.fromCode(
@@ -212,7 +209,6 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                           _currentLocaleId = "en_US";
                           speak("Hello how can i help you?");
                         });
-                        print('here ' + _currentLocaleId);
                       }),
                 ],
                 ),
@@ -242,28 +238,6 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                         },
                       ),
                     ),
-               
-        //              onPressed:()  => showDialog<String>(
-        // context: context,
-        // builder: (BuildContext context) => AlertDialog(
-        //   title: const Text('Choix des langues'),
-        //   // content: const Text('AlertDialog description'),
-        //   actions: <Widget>[
-        //     TextButton(
-        //       onPressed: () => Navigator.pop(context, _currentLocaleId="en_US"),
-        //       child: const Text('Anglais'),
-        //     ),
-        //     TextButton(
-        //       onPressed: () => Navigator.pop(context, 'OK'),
-        //       child: const Text('Francais'),
-        //     ),
-        //       TextButton(
-        //       onPressed: () => Navigator.pop(context, 'OK'),
-        //       child: const Text('Arabe'),
-        //     ),
-        //   ],
-        // ),
-                      // ),
                   
                     IconButton(
                             onPressed: () {
@@ -283,22 +257,17 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
   }
 
   Future<FlutterTts> speak(message) async {
-    print("je suis la " + _currentLocaleId);
     switch (_currentLocaleId) {
       case 'ar_SA':
-       print("current ar "+_currentLocaleId);
         await flutterTts.setLanguage("ar");
         break;
       case 'fr_CA':
-       print("current fr "+_currentLocaleId);
         await flutterTts.setLanguage("fr-FR");
         for (int i = 0; i < message.length; i++) {
           message = message.replaceAll('`', ' ');
         }
-        print("after " + message);
         break;
       case 'en_US':
-      print("current en "+_currentLocaleId);
         await flutterTts.setLanguage("en-US");
         break;
       default:
