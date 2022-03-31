@@ -91,6 +91,7 @@ class _VoiceBubbleState extends State<VoiceBubble> {
                   //                 MessageType.Receiver
                   //             ? Colors.black
                   //             : Colors.white))
+                  height: 20,
                   child: ElevatedButton.icon(
                     
                     style: ElevatedButton.styleFrom(
@@ -106,7 +107,7 @@ class _VoiceBubbleState extends State<VoiceBubble> {
                             : Colors.white),
                     label: read == true
                         ? Container(
-                            height: 50,
+                            height: 40,
                             width: 100,
                             
                             // child: SimpleWaveWidget(
@@ -141,12 +142,12 @@ class _VoiceBubbleState extends State<VoiceBubble> {
         blur: const MaskFilter.blur(BlurStyle.solid, 5),
         //blur intensity for waves
       ),
-      waveAmplitude: 5.00, //depth of curves
+      waveAmplitude: 3.00, //depth of curves
       waveFrequency: 5, //number of curves in waves
       backgroundColor: Colors.transparent, //background colors
       size: const Size(
         150.0,
-        30.0,
+        20.0,
       ),
       
     ),

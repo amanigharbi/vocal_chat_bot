@@ -1,6 +1,6 @@
 // ignore: import_of_legacy_library_into_null_safe
 // ignore_for_file: deprecated_member_use
-
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
@@ -15,6 +15,8 @@ import 'package:intl/intl.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flag/flag.dart';
 import 'package:vocal_chat_bot/models/vocal_message.dart';
+import 'package:cupertino_icons/cupertino_icons.dart';
+
 
 enum MessageType {
   // ignore: constant_identifier_names
@@ -140,11 +142,29 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                   }),
             ),
             Align(
-              alignment: const FractionalOffset(1, 0.91),
-              child: SpeedDial(
-                animatedIcon: AnimatedIcons.menu_close,
+              alignment: Alignment.bottomRight,          
+               child: Container(
+                padding: const EdgeInsets.only(right: 2, bottom: 5),
+                height: 50,
+                width: 100,
+                color: Colors.white,
+                child: Row(
+                  children: <Widget>[
+                             IconButton(
+                      icon: Icon(_speechToText.isNotListening
+                          ? Icons.mic_off
+                          : Icons.mic),
+                      color: Colors.red.shade900,
+                      onPressed: _speechToText.isNotListening
+                          ? _startListening
+                          : _stopListening,
+                    ),
+                     SpeedDial(
+                icon: CupertinoIcons.globe,
+                iconTheme: IconThemeData(color:Colors.red.shade900 ),
+                // label: Text('langue'),
                 openCloseDial: isDialOpen,
-                backgroundColor: Colors.red.shade900,
+                backgroundColor: Colors.white,
                 overlayColor: Colors.grey,
                 overlayOpacity: 0.5,
                 spacing: 15,
@@ -195,14 +215,16 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                         print('here ' + _currentLocaleId);
                       }),
                 ],
-              ),
+                ),
+          ],
+                ),),
             ),
             Align(
               alignment: Alignment.bottomLeft,
               child: Container(
-                padding: const EdgeInsets.only(left: 16, bottom: 5),
+                padding: const EdgeInsets.only(left: 5, bottom: 5,right: 5),
                 height: 50,
-                width: double.infinity,
+                width: 270,
                 color: Colors.white,
                 child: Row(
                   children: <Widget>[
@@ -220,49 +242,36 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                         },
                       ),
                     ),
+               
+        //              onPressed:()  => showDialog<String>(
+        // context: context,
+        // builder: (BuildContext context) => AlertDialog(
+        //   title: const Text('Choix des langues'),
+        //   // content: const Text('AlertDialog description'),
+        //   actions: <Widget>[
+        //     TextButton(
+        //       onPressed: () => Navigator.pop(context, _currentLocaleId="en_US"),
+        //       child: const Text('Anglais'),
+        //     ),
+        //     TextButton(
+        //       onPressed: () => Navigator.pop(context, 'OK'),
+        //       child: const Text('Francais'),
+        //     ),
+        //       TextButton(
+        //       onPressed: () => Navigator.pop(context, 'OK'),
+        //       child: const Text('Arabe'),
+        //     ),
+        //   ],
+        // ),
+                      // ),
+                  
                     IconButton(
-                      icon: Icon(_speechToText.isNotListening
-                          ? Icons.mic_off
-                          : Icons.mic),
-                      color: Colors.red.shade900,
-                      // onPressed: _speechToText.isNotListening
-                      //     ? _startListening
-                      //     : _stopListening,
-                     onPressed:()  => showDialog<String>(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-          title: const Text('Choix des langues'),
-          // content: const Text('AlertDialog description'),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.pop(context, _currentLocaleId="en_US"),
-              child: const Text('Anglais'),
-            ),
-            TextButton(
-              onPressed: () => Navigator.pop(context, 'OK'),
-              child: const Text('Francais'),
-            ),
-              TextButton(
-              onPressed: () => Navigator.pop(context, 'OK'),
-              child: const Text('Arabe'),
-            ),
-          ],
-        ),
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.bottomRight,
-                      child: Container(
-                        width: 70,
-                        height: 70,
-                        child: IconButton(
                             onPressed: () {
                               _getResponse(_queryController.text);
                             },
                             color: Colors.red.shade900,
                             icon: const Icon(Icons.send)),
-                      ),
-                    ),
+                     
                   ],
                 ),
               ),
@@ -277,20 +286,23 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
     print("je suis la " + _currentLocaleId);
     switch (_currentLocaleId) {
       case 'ar_SA':
+       print("current ar "+_currentLocaleId);
         await flutterTts.setLanguage("ar");
         break;
       case 'fr_CA':
-        await flutterTts.setLanguage("fr_CA");
+       print("current fr "+_currentLocaleId);
+        await flutterTts.setLanguage("fr-FR");
         for (int i = 0; i < message.length; i++) {
           message = message.replaceAll('`', ' ');
         }
         print("after " + message);
         break;
       case 'en_US':
-        await flutterTts.setLanguage("en_US");
+      print("current en "+_currentLocaleId);
+        await flutterTts.setLanguage("en-US");
         break;
       default:
-        await flutterTts.setLanguage("fr_CA");
+        await flutterTts.setLanguage("fr-FR");
     }
     
     await flutterTts.speak(message);
@@ -317,6 +329,8 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
       );
 
       setState(() async {
+           await flutterTts.getLanguages;
+
         await speak(response.data);
         _insertSingleItem(response.data, MessageType.Receiver,
             DateFormat("HH:mm").format(DateTime.now()));
