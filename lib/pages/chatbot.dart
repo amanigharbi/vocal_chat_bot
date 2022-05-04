@@ -17,7 +17,6 @@ import 'package:flag/flag.dart';
 import 'package:vocal_chat_bot/models/vocal_message.dart';
 import 'package:cupertino_icons/cupertino_icons.dart';
 
-
 enum MessageType {
   // ignore: constant_identifier_names
   Sender,
@@ -46,6 +45,15 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
   List<LocaleName> _localeNames = [];
   final TextEditingController _queryController = TextEditingController();
   ValueNotifier<bool> isDialOpen = ValueNotifier(false);
+  String? NomRec;
+  String? PrenomRec;
+  String? cinRec;
+  String? EmailRec;
+  String? AdrRec;
+  String? DescRec;
+String? type;
+
+ 
 
   @override
   void initState() {
@@ -134,22 +142,21 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                   initialItemCount: vocalMessage.length,
                   itemBuilder: (BuildContext context, int index,
                       Animation<double> animation) {
-                    // return _buildItem(_data[index], animation, index);
                     return VoiceBubble(
                       vocalMessage: vocalMessage[index],
                     );
                   }),
             ),
             Align(
-              alignment: Alignment.bottomRight,          
-               child: Container(
+              alignment: Alignment.bottomRight,
+              child: Container(
                 padding: const EdgeInsets.only(right: 2, bottom: 5),
                 height: 50,
                 width: 100,
                 color: Colors.white,
                 child: Row(
                   children: <Widget>[
-                             IconButton(
+                    IconButton(
                       icon: Icon(_speechToText.isNotListening
                           ? Icons.mic_off
                           : Icons.mic),
@@ -158,67 +165,69 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                           ? _startListening
                           : _stopListening,
                     ),
-                     SpeedDial(
-                icon: CupertinoIcons.globe,
-                iconTheme: IconThemeData(color:Colors.red.shade900 ),
-                // label: Text('langue'),
-                openCloseDial: isDialOpen,
-                backgroundColor: Colors.white,
-                overlayColor: Colors.grey,
-                overlayOpacity: 0.5,
-                spacing: 15,
-                spaceBetweenChildren: 15,
-                closeManually: false,
-                children: [
-                  SpeedDialChild(
-                      child: Flag.fromCode(
-                        FlagsCode.FR,
-                        height: 30,
-                        width: 30,
-                      ),
-                      label: 'Francais',
-                      backgroundColor: const Color.fromARGB(255, 207, 47, 47),
-                      onTap: () {
-                        setState(() {
-                          _currentLocaleId = "fr_CA";
-                          speak("Salut comment puis-je vous aider?");
-                        });
-                      }),
-                  SpeedDialChild(
-                      child: Flag.fromCode(
-                        FlagsCode.TN,
-                        height: 30,
-                        width: 30,
-                      ),
-                      label: 'Arabe',
-                      onTap: () {
-                        setState(() {
-                          _currentLocaleId = "ar_SA";
-                          speak("مرحبا كيف يمكنني مساعدتك؟");
-                        });
-                      }),
-                  SpeedDialChild(
-                      child: Flag.fromCode(
-                        FlagsCode.US,
-                        height: 30,
-                        width: 30,
-                      ),
-                      label: 'Anglais',
-                      onTap: () {
-                        setState(() {
-                          _currentLocaleId = "en_US";
-                          speak("Hello how can i help you?");
-                        });
-                      }),
-                ],
+                    SpeedDial(
+                      icon: CupertinoIcons.globe,
+                      iconTheme: IconThemeData(color: Colors.red.shade900),
+                      // label: Text('langue'),
+                      openCloseDial: isDialOpen,
+                      backgroundColor: Colors.white,
+                      overlayColor: Colors.grey,
+                      overlayOpacity: 0.5,
+                      spacing: 15,
+                      spaceBetweenChildren: 15,
+                      closeManually: false,
+                      children: [
+                        SpeedDialChild(
+                            child: Flag.fromCode(
+                              FlagsCode.FR,
+                              height: 30,
+                              width: 30,
+                            ),
+                            label: 'Francais',
+                            backgroundColor:
+                                const Color.fromARGB(255, 207, 47, 47),
+                            onTap: () {
+                              setState(() {
+                                _currentLocaleId = "fr_CA";
+                                speak("Salut comment puis-je vous aider?");
+                              });
+                            }),
+                        SpeedDialChild(
+                            child: Flag.fromCode(
+                              FlagsCode.TN,
+                              height: 30,
+                              width: 30,
+                            ),
+                            label: 'Arabe',
+                            onTap: () {
+                              setState(() {
+                                _currentLocaleId = "ar_SA";
+                                speak("مرحبا كيف يمكنني مساعدتك؟");
+                              });
+                            }),
+                        SpeedDialChild(
+                            child: Flag.fromCode(
+                              FlagsCode.US,
+                              height: 30,
+                              width: 30,
+                            ),
+                            label: 'Anglais',
+                            onTap: () {
+                              setState(() {
+                                _currentLocaleId = "en_US";
+                                speak("Hello how can i help you?");
+                              });
+                            }),
+                      ],
+                    ),
+                  ],
                 ),
-          ],
-                ),),
+              ),
             ),
             Align(
               alignment: Alignment.bottomLeft,
               child: Container(
-                padding: const EdgeInsets.only(left: 5, bottom: 5,right: 5),
+                padding: const EdgeInsets.only(left: 5, bottom: 5, right: 5),
                 height: 50,
                 width: 270,
                 color: Colors.white,
@@ -238,14 +247,12 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                         },
                       ),
                     ),
-                  
                     IconButton(
-                            onPressed: () {
-                              _getResponse(_queryController.text);
-                            },
-                            color: Colors.red.shade900,
-                            icon: const Icon(Icons.send)),
-                     
+                        onPressed: () {
+                          _getResponse(_queryController.text);
+                        },
+                        color: Colors.red.shade900,
+                        icon: const Icon(Icons.send)),
                   ],
                 ),
               ),
@@ -273,44 +280,219 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
       default:
         await flutterTts.setLanguage("fr-FR");
     }
-    
+
     await flutterTts.speak(message);
-    
+
     return flutterTts;
   }
 
+  int v = 0;
   Future<void> _getResponse(txt) async {
     _insertSingleItem(
         txt, MessageType.Sender, DateFormat("HH:mm").format(DateTime.now()));
-    try {
-      var dataForm = {
-        "message": txt,
-      };
-      var response = await Dio().post(
-        "http://192.168.1.2:5050/predict",
-        options: Options(
-          headers: {
-            Headers.contentTypeHeader: 'application/json',
-            Headers.acceptHeader: 'application/json'
-          },
-        ),
-        data: dataForm,
-      );
+    if (txt.toString().contains("réclamation") ||
+        txt.toString().contains("شكاية") ||
+        txt.toString().contains("reclamation")) {
+      switch (_currentLocaleId) {
+        case 'ar_SA':
+          speak("مرحبا في فضاء الشكايات من فضلك ارسل لي اسم العائلة ");
+          _insertSingleItem(
+              "مرحبا في فضاء الشكايات من فضلك ارسل لي اسم العائلة ",
+              MessageType.Receiver,
+              DateFormat("HH:mm").format(DateTime.now()));
 
-      setState(() async {
-           await flutterTts.getLanguages;
+          break;
+        case 'fr_CA':
+          speak(
+              "Bonjour dans l espace de réclamation merci d envoyer votre nom");
+          _insertSingleItem(
+              "Bonjour dans l espace de réclamation merci d envoyer votre nom",
+              MessageType.Receiver,
+              DateFormat("HH:mm").format(DateTime.now()));
+          v = 1;
+          break;
+        case 'en_US':
+          speak("Hello! please send me your first name ");
+          _insertSingleItem("Hello! please send me your first name",
+              MessageType.Receiver, DateFormat("HH:mm").format(DateTime.now()));
 
-        await speak(response.data);
-        _insertSingleItem(response.data, MessageType.Receiver,
-            DateFormat("HH:mm").format(DateTime.now()));
-      });
-    } catch (e) {
-      // ignore: avoid_print
-      print("Failed -> $e");
-    } finally {
-      _queryController.clear();
+          break;
+      }
+
+      print("teeeeeeeeeeeeext " + txt);
+      txt = "";
+      print("teeeeeeeeeeeeext2 " + txt);
+      print("vvvv " + v.toString());
+    }
+    switch (v) {
+      case 0:
+        print("ok");
+        try {
+          var dataForm = {
+            "message": txt,
+          };
+          var response = await Dio().post(
+            "http://192.168.1.7:5050/predict",
+            options: Options(
+              headers: {
+                Headers.contentTypeHeader: 'application/json',
+                Headers.acceptHeader: 'application/json'
+              },
+            ),
+            data: dataForm,
+          );
+          print("aaaaaa " + response.toString());
+
+          setState(() async {
+            await flutterTts.getLanguages;
+
+            await speak(response.data);
+
+            _insertSingleItem(response.data, MessageType.Receiver,
+                DateFormat("HH:mm").format(DateTime.now()));
+          });
+        } catch (e) {
+          // ignore: avoid_print
+          print("Failed -> $e");
+        } finally {
+          _queryController.clear();
+        }
+        break;
+      case 1:
+        if (txt.toString().isNotEmpty) {
+          NomRec = txt;
+          print("la je suis " + txt);
+          NomRec = txt;
+          if (NomRec is String && NomRec.toString().trim().length>=4) {
+            speak("Monsieur Madame $NomRec s il vous envoyer moi votre prénom");
+            _insertSingleItem(
+                "Monsieur Madame $NomRec s il vous envoyer moi votre prénom",
+                MessageType.Receiver,
+                DateFormat("HH:mm").format(DateTime.now()));
+            v = 2;
+          }
+        }
+        break;
+      case 2:
+        print("la je suis prenom " + txt);
+        PrenomRec = txt;
+        if (PrenomRec is String && PrenomRec.toString().trim().length>3) {
+          speak("Monsieur Madame $NomRec $PrenomRec  envoyer moi votre cin");
+          _insertSingleItem(
+              "Monsieur Madame $NomRec $PrenomRec  envoyer moi votre cin",
+              MessageType.Receiver,
+              DateFormat("HH:mm").format(DateTime.now()));
+          v = 3;
+        }
+        break;
+      case 3:
+        print("la je suis cin " + txt);
+        cinRec = txt;
+        if ((cinRec.toString().length > 8)) {
+          speak("Génial maintenant c quoi votre adresse");
+          _insertSingleItem("Génial maintenant c quoi votre adresse",
+              MessageType.Receiver, DateFormat("HH:mm").format(DateTime.now()));
+          v = 4;
+        }
+        break;
+      case 4:
+        print("la je suis adresse " + txt);
+        AdrRec = txt;
+        if (AdrRec is String && NomRec.toString().trim().length>4) {
+          speak("Génial maintenant c quoi votre email");
+          _insertSingleItem("Génial maintenant c quoi votre email",
+              MessageType.Receiver, DateFormat("HH:mm").format(DateTime.now()));
+          v = 5;
+        }
+        break;
+      case 5:
+        print("la je suis email " + txt);
+        EmailRec = txt;
+        if (RegExp(r'\S+@\S+\.\S+').hasMatch(EmailRec.toString())) {
+           speak("Choisir un type parmi cette liste dire 1 si la réclamation de type administration 2 si de type construction anarchique 3 si de type éclairage publique 4 si de type énergie 5 si de type espace verts 6 mobilité 7 santé et hiégiéne et 8 si c est une autre type");
+          _insertSingleItem("Choisir un type parmi cette liste dire 1 si la réclamation de type administration 2 si de type construction anarchique 3 si de type éclairage publique 4 si de type énergie 5 si de type espace verts 6 mobilité 7 santé et hiégiéne et 8 si c est un autre type", MessageType.Receiver,
+              DateFormat("HH:mm").format(DateTime.now()));
+        
+          v = 6;
+        } else {
+          speak("email non valide");
+          _insertSingleItem("email non valide", MessageType.Receiver,
+              DateFormat("HH:mm").format(DateTime.now()));
+        }
+        break;
+          case 6:
+        print("la je suis type " + txt);
+        
+        if (txt.toString().contains('1')) {
+          type = "administration";
+        }
+        else  if (txt.toString().contains('2')) {
+          type = "construction anarchiques";
+        }
+         else  if (txt.toString().contains('3')) {
+          type = "Eclairage publique";
+        }
+         else  if (txt.toString().contains('4')) {
+          type = "Energie";
+        }
+         else  if (txt.toString().contains('5')) {
+          type = "Espaces Verts";
+        }
+         else  if (txt.toString().contains('6')) {
+          type = "Mobilité";
+        }
+         else  if (txt.toString().contains('7')) {
+          type = "Santé et Higiéne";
+        }
+         else  if (txt.toString().contains('8')) {
+          type = "Autres Réclamations ";
+        }
+          speak("Merci de m envoyer une petite description de votre réclamation");
+          _insertSingleItem("Merci de m envoyer une petite description de votre réclamation", MessageType.Receiver,
+              DateFormat("HH:mm").format(DateTime.now()));
+          v = 7;
+         
+        break;
+          case 7:
+        print("la je suis description " + txt);
+        DescRec = txt;
+        if (DescRec is String && DescRec.toString().trim().length>10){
+        speak("Demande enregistré");
+          _insertSingleItem("Demande enregistré", MessageType.Receiver,
+              DateFormat("HH:mm").format(DateTime.now()));
+          print("nom " +
+              NomRec.toString() +
+              " prenom " +
+              PrenomRec.toString() +
+              " cin " +
+              cinRec.toString() +
+              " email " +
+              EmailRec.toString() +
+              " adr " +
+              AdrRec.toString()+
+              " type " +
+              type.toString()
+              + " description "+ DescRec.toString()); 
+          
+          v = 8;
+        }
+        break;
+      case 8:
+        print("demande enregisté");
+        print("nom " +
+            NomRec.toString() +
+            " prenom " +
+            PrenomRec.toString() +
+            " cin " +
+            cinRec.toString() +
+            // " email " +
+            // EmailRec.toString() +
+            " adr " +
+            AdrRec.toString());
+        break;
     }
   }
+ 
 
   void _insertSingleItem(String message, MessageType type, String time) {
     vocalMessage.add(VocalMessage(message: message, type: type, time: time));
