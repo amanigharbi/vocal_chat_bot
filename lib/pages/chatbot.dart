@@ -1,6 +1,12 @@
 // ignore: import_of_legacy_library_into_null_safe
 // ignore_for_file: deprecated_member_use
+import 'dart:convert';
+import 'dart:ffi';
+import 'dart:math';
+import 'dart:typed_data';
+
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
@@ -16,6 +22,10 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flag/flag.dart';
 import 'package:vocal_chat_bot/models/vocal_message.dart';
 import 'package:cupertino_icons/cupertino_icons.dart';
+import 'package:vocal_chat_bot/pages/mysql.dart';
+import 'package:http/http.dart' as http;
+import 'package:syncfusion_flutter_pdf/pdf.dart';
+import 'mobile.dart' if (dart.library.html) 'web.dart';
 
 enum MessageType {
   // ignore: constant_identifier_names
@@ -47,13 +57,13 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
   ValueNotifier<bool> isDialOpen = ValueNotifier(false);
   String? NomRec;
   String? PrenomRec;
-  String? cinRec;
+  String cinRec ="";
   String? EmailRec;
   String? AdrRec;
   String? DescRec;
-String? type;
-
- 
+  String? type;
+  String NumRec='';
+ bool? error;
 
   @override
   void initState() {
@@ -277,51 +287,70 @@ String? type;
       case 'en_US':
         await flutterTts.setLanguage("en-US");
         break;
-      default:
-        await flutterTts.setLanguage("fr-FR");
+      
+        // await flutterTts.setLanguage("fr-FR");
     }
 
     await flutterTts.speak(message);
 
     return flutterTts;
   }
-
+void _voiceBot(String msg){
+       speak(msg);
+              _insertSingleItem(
+                  msg,
+                  MessageType.Receiver,
+                  DateFormat("HH:mm").format(DateTime.now()));
+}
   int v = 0;
   Future<void> _getResponse(txt) async {
     _insertSingleItem(
         txt, MessageType.Sender, DateFormat("HH:mm").format(DateTime.now()));
     if (txt.toString().contains("réclamation") ||
-        txt.toString().contains("شكاية") ||
+        txt.toString().contains("شكوى") ||
         txt.toString().contains("reclamation")) {
       switch (_currentLocaleId) {
         case 'ar_SA':
-          speak("مرحبا في فضاء الشكايات من فضلك ارسل لي اسم العائلة ");
-          _insertSingleItem(
-              "مرحبا في فضاء الشكايات من فضلك ارسل لي اسم العائلة ",
-              MessageType.Receiver,
-              DateFormat("HH:mm").format(DateTime.now()));
-               v = 1;
+        _voiceBot("مرحبا في فضاء الشكايات من فضلك ارسل لي اسم العائلة ");
+          v = 1;
 
           break;
         case 'fr_CA':
-          speak(
-              "Bonjour dans l`espace de réclamation merci d`envoyer votre nom");
-          _insertSingleItem(
-              "Bonjour dans l`espace de réclamation merci d`envoyer votre nom",
-              MessageType.Receiver,
-              DateFormat("HH:mm").format(DateTime.now()));
+   _voiceBot("Bienvenue dans l`espace de réclamation merci d`envoyer votre nom");
           v = 1;
 
           break;
         case 'en_US':
-          speak("Hello! please send me your last name ");
-          _insertSingleItem("Hello! please send me your last name",
-              MessageType.Receiver, DateFormat("HH:mm").format(DateTime.now()));
- v = 1;
+        _voiceBot("Hello! please send me your last name");
+          v = 1;
           break;
       }
       txt = "";
     }
+       if ((txt.toString().contains("suivi"))|| (txt.toString().contains("اتباع"))
+        || (txt.toString().contains("check"))) {
+           
+           
+                switch (_currentLocaleId) {
+                    case "en_US":
+                        _voiceBot("Hi send me the claim number you want to track");
+                        
+                        v = 8;
+                        break;
+                    case "fr_CA":
+                        _voiceBot("Salut envoyez moi le numéro de réclamation que vous voullez suivre");
+                       
+                        v = 8;
+                        break;
+                    case "ar_SA":
+                        _voiceBot("مرحبًا ، أرسل لي رقم المطالبة الذي تريد تتبعه");
+                        
+                        v = 8;
+                        break;
+                }
+             txt = "";
+              
+        }
     switch (v) {
       case 0:
         try {
@@ -342,10 +371,7 @@ String? type;
           setState(() async {
             await flutterTts.getLanguages;
 
-            await speak(response.data);
-
-            _insertSingleItem(response.data, MessageType.Receiver,
-                DateFormat("HH:mm").format(DateTime.now()));
+           _voiceBot(response.data);
           });
         } catch (e) {
           // ignore: avoid_print
@@ -357,324 +383,313 @@ String? type;
       case 1:
         if (txt.toString().isNotEmpty) {
           NomRec = txt;
-          if (NomRec is String && NomRec.toString().trim().length>=4) {
-            switch(_currentLocaleId){
+          print("nom "+NomRec.toString());
+          if (NomRec is String && NomRec.toString().trim().length >= 4) {
+            switch (_currentLocaleId) {
               case 'ar_SA':
-              speak("ارسل لي اسمك $NomRec السيد/السيدة");
-            _insertSingleItem(
-                "  ارسل لي اسمك $NomRec السيد/السيدة",
-                MessageType.Receiver,
-                DateFormat("HH:mm").format(DateTime.now()));
-        
-              break;
+
+                _voiceBot("السيد/السيدة $NomRec ارسل لي اسمك");
+              
+
+                break;
               case 'fr_CA':
-              speak("Monsieur/Madame $NomRec s`il vous plait envoyer moi votre prénom");
-            _insertSingleItem(
-                "Monsieur/Madame $NomRec s`il vous plait envoyer moi votre prénom",
-                MessageType.Receiver,
-                DateFormat("HH:mm").format(DateTime.now()));
+                _voiceBot(
+                    "Monsieur/Madame $NomRec s`il vous plait envoyer moi votre prénom");
             
-              break;
+                break;
               case 'en_US':
-                 speak("Mr/Mrs $NomRec please send me your first name");
-            _insertSingleItem(
-                "Mr/Mrs $NomRec please send me your first name",
-                MessageType.Receiver,
-                DateFormat("HH:mm").format(DateTime.now()));
-              break;
-            
+                _voiceBot("Mr/Mrs $NomRec please send me your first name");
+                
+                break;
             }
             v = 2;
-          }
-          else{
-              switch (_currentLocaleId) {
-            case 'ar_SA':
-                    speak("اسم غير صحيح");
-          _insertSingleItem("اسم غير صحيح", MessageType.Receiver,
-              DateFormat("HH:mm").format(DateTime.now()));
-              break;
-               case 'fr_CA':
-                    speak("Nom non valide");
-          _insertSingleItem("Nom non valide", MessageType.Receiver,
-              DateFormat("HH:mm").format(DateTime.now()));
-              break;
-               case 'en_US':
-                    speak("Invalid name");
-          _insertSingleItem("Invalid name", MessageType.Receiver,
-              DateFormat("HH:mm").format(DateTime.now()));
-              break;
-              }
+          } else {
+            switch (_currentLocaleId) {
+              case 'ar_SA':
+                _voiceBot("اسم غير صحيح");
+            
+                break;
+              case 'fr_CA':
+                _voiceBot("Nom non valide");
+                
+                break;
+              case 'en_US':
+                _voiceBot("Invalid name");
+          
+                break;
+            }
           }
         }
         break;
       case 2:
         PrenomRec = txt;
-        if (PrenomRec is String && PrenomRec.toString().trim().length>3) {
-           switch(_currentLocaleId){
-              case 'ar_SA':
-              speak("ارسل لي رقم بطاقة هويتك $PrenomRec $NomRec السيد/السيدة");
-            _insertSingleItem(
-                "  ارسل لي رقم بطاقة هويتك $PrenomRec $NomRec السيد/السيدة",
-                MessageType.Receiver,
-                DateFormat("HH:mm").format(DateTime.now()));
-         
-              break;
-              case 'fr_CA':
-             speak("Monsieur/Madame $NomRec $PrenomRec  envoyer moi votre numéro de carte d`identité");
-          _insertSingleItem(
-              "Monsieur/Madame $NomRec $PrenomRec  envoyer moi votre numéro de carte d`identité",
-              MessageType.Receiver,
-              DateFormat("HH:mm").format(DateTime.now()));
-            
-              break;
-              case 'en_US':
-                 speak("Mr/Mrs $NomRec $PrenomRec send me your identity card number");
-            _insertSingleItem(
-                "Mr/Mrs $NomRec $PrenomRec send me your identity card number",
-                MessageType.Receiver,
-                DateFormat("HH:mm").format(DateTime.now()));
-              break;
-           }
-        
-          v = 3;
-        }
-         else{
-              switch (_currentLocaleId) {
+         print("prenom "+PrenomRec.toString());
+        if (PrenomRec is String && PrenomRec.toString().trim().length > 3) {
+          switch (_currentLocaleId) {
             case 'ar_SA':
-                    speak("قل الاسم الحقيقي من فضلك");
-          _insertSingleItem("قل الاسم الحقيقي من فضلك", MessageType.Receiver,
-              DateFormat("HH:mm").format(DateTime.now()));
+              _voiceBot("السيد/السيدة $PrenomRec $NomRec ارسل لي رقم بطاقة هويتك");
+             
+
               break;
-               case 'fr_CA':
-                    speak("Dire un vrai prénom s`il vous plait");
-          _insertSingleItem("Dire un vrai prénom s`il vous plait", MessageType.Receiver,
-              DateFormat("HH:mm").format(DateTime.now()));
+            case 'fr_CA':
+              _voiceBot(
+                  "Monsieur/Madame $NomRec $PrenomRec  envoyer moi votre numéro de carte d`identité");
+             
+
               break;
-               case 'en_US':
-                     speak("Say a real name please");
-          _insertSingleItem("Say a real name please", MessageType.Receiver,
-              DateFormat("HH:mm").format(DateTime.now()));
+            case 'en_US':
+              _voiceBot(
+                  "Mr/Mrs $NomRec $PrenomRec send me your identity card number");
+             
+              break;
+          }
+
+          v = 3;
+        } else {
+          switch (_currentLocaleId) {
+            case 'ar_SA':
+              _voiceBot("قل الاسم الحقيقي من فضلك");
+             
+              break;
+            case 'fr_CA':
+              _voiceBot("Dire un vrai prénom s`il vous plait");
               
               break;
-              }
+            case 'en_US':
+              _voiceBot("Say a real name please");
+             
+
+              break;
           }
+        }
         break;
       case 3:
-        cinRec = txt;
-        if ((cinRec.toString().length > 8)) {
-          switch(_currentLocaleId){
-          case 'ar_SA':
-              speak("عظيم الآن ما هو عنوانك");
-            _insertSingleItem(
-                " عظيم الآن ما هو عنوانك",
-                MessageType.Receiver,
-                DateFormat("HH:mm").format(DateTime.now()));
+          // cinRec = txt.replaceAll(' ', '');
+           cinRec =txt;
+            if(cinRec.contains('صفر')){
+    cinRec=cinRec.replaceAll('صفر', '0');
+   }
+     if(cinRec.contains('واحد')){
+    cinRec=cinRec.replaceAll('واحد', '1');
+   }
+     if(cinRec.contains('اثنين')){
+    cinRec=cinRec.replaceAll('اثنين', '2');
+   }
+     if(cinRec.contains('ثلاثه')){
+    cinRec=cinRec.replaceAll('ثلاثه', '3');
+   }
+     if(cinRec.contains('اربعه')){
+    cinRec=cinRec.replaceAll('اربعه', '4');
+   }
+     if(cinRec.contains('خمسه')){
+    cinRec=cinRec.replaceAll('خمسه', '5');
+   }
+     if(cinRec.contains('سته')){
+    cinRec=cinRec.replaceAll('سته', '6');
+   }
+     if(cinRec.contains('سبعه')){
+    cinRec=cinRec.replaceAll('سبعه', '7');
+   }
+     if(cinRec.contains('ثمانيه')){
+    cinRec=cinRec.replaceAll('ثمانيه', '8');
+   }
+      if(cinRec.contains('تسعه')){
+    cinRec=cinRec.replaceAll('تسعه', '9');
+   }
+       
+      cinRec=cinRec.replaceAll(' ', '');
+             
+                      
+                        // String cinArray = txt.split(' ');
+                        // for (var i = 0; i < cinArray.length; i++) {
+                        //     cinRec += getNumLet(cinArray[i]);
+                        // }
+                    
+                    // else {
+                    //     cinRec = txt.replaceAll(' ', '');
+                    // }
+ print("cin "+cinRec.toString());
+        if ((cinRec.toString().length == 8)) {
+          switch (_currentLocaleId) {
+            case 'ar_SA':
+              _voiceBot("عظيم الآن ما هو عنوانك");
+          
+
+              break;
+            case 'fr_CA':
+              _voiceBot("Génial maintenant c`est quoi votre adresse");
+           
+              break;
+            case 'en_US':
+              _voiceBot("Great now what is your address");
             
               break;
-              case 'fr_CA':
-        speak("Génial maintenant c`est quoi votre adresse");
-          _insertSingleItem("Génial maintenant c`est quoi votre adresse",
-              MessageType.Receiver, DateFormat("HH:mm").format(DateTime.now()));
-              break;
-              case 'en_US':
-                 speak("Great now what is your address");
-            _insertSingleItem(
-                "Great now what is your address",
-                MessageType.Receiver,
-                DateFormat("HH:mm").format(DateTime.now()));
-              break;
-           }
+          }
 
           v = 4;
-        }
-         else{
-              switch (_currentLocaleId) {
+        } else {
+          switch (_currentLocaleId) {
             case 'ar_SA':
-                    speak("يجب أن يكون رقم بطاقة الهوية رقمًا أكبر من 8");
-          _insertSingleItem("يجب أن يكون رقم بطاقة الهوية رقمًا أكبر من 8", MessageType.Receiver,
-              DateFormat("HH:mm").format(DateTime.now()));
+              _voiceBot("يجب أن يكون رقم بطاقة الهوية رقمًا يساوي 8");
+           
               break;
-               case 'fr_CA':
-                    speak("Le numéro de carte d`identité doit etre un nombre supérieure à 8");
-          _insertSingleItem("Le numéro de carte d`identité doit etre un nombre sypérieure à 8", MessageType.Receiver,
-              DateFormat("HH:mm").format(DateTime.now()));
+            case 'fr_CA':
+              _voiceBot(
+                  "Le numéro de carte d`identité doit etre un nombre de 8 chiffres");
+           
               break;
-               case 'en_US':
-                    speak("The identity card number must be a number greater than 8");
-          _insertSingleItem("The identity card number must be a number greater than 8", MessageType.Receiver,
-              DateFormat("HH:mm").format(DateTime.now()));
+            case 'en_US':
+              _voiceBot("The identity card number must be a number of 8");
+            
               break;
-              }
           }
+        }
         break;
       case 4:
         AdrRec = txt;
-        if (AdrRec is String && NomRec.toString().trim().length>4) {
-          switch(_currentLocaleId){
-          case 'ar_SA':
-              speak("ماهو بريدك الإلكتروني");
-            _insertSingleItem(
-                "ماهو بريدك الإلكتروني",
-                MessageType.Receiver,
-                DateFormat("HH:mm").format(DateTime.now()));
+         print("adresse "+AdrRec.toString());
+        if (AdrRec is String && NomRec.toString().trim().length > 4) {
+          switch (_currentLocaleId) {
+            case 'ar_SA':
+              _voiceBot("ماهو بريدك الإلكتروني");
+              
+      _currentLocaleId = 'en_US';
+              break;
+            case 'fr_CA':
+              _voiceBot("c`est quoi Votre email ");
+              
+              break;
+            case 'en_US':
+              _voiceBot("what is your email");
+             
+              break;
+          }
+
+          v = 5;
+        } else {
+          switch (_currentLocaleId) {
+            case 'ar_SA':
+              _voiceBot("هناك خطأ ما حاول مرة أخرى");
             
               break;
-              case 'fr_CA':
-         speak("c`est quoi Votre email ");
-          _insertSingleItem("c`est quoi Votre email",
-              MessageType.Receiver, DateFormat("HH:mm").format(DateTime.now()));
+            case 'fr_CA':
+              _voiceBot("il y a une erreur réessayer");
+             
               break;
-              case 'en_US':
-                 speak("what is your email");
-            _insertSingleItem(
-                "what is your email",
-                MessageType.Receiver,
-                DateFormat("HH:mm").format(DateTime.now()));
+            case 'en_US':
+              _voiceBot("there is an error try again");
+             
               break;
-           }
-         
-          v = 5;
-        }
-         else{
-              switch (_currentLocaleId) {
-            case 'ar_SA':
-                    speak("هناك خطأ ما حاول مرة أخرى");
-          _insertSingleItem("هناك خطأ ما حاول مرة أخرى", MessageType.Receiver,
-              DateFormat("HH:mm").format(DateTime.now()));
-              break;
-               case 'fr_CA':
-                    speak("il y a une erreur réessayer");
-          _insertSingleItem("il y a une erreur réessayer", MessageType.Receiver,
-              DateFormat("HH:mm").format(DateTime.now()));
-              break;
-               case 'en_US':
-                    speak("there is an error try again");
-          _insertSingleItem("there is an error try again", MessageType.Receiver,
-              DateFormat("HH:mm").format(DateTime.now()));
-              break;
-              }
           }
+        }
         break;
       case 5:
-        EmailRec = txt;
+       for (int i = 0; i < txt.length; i++) {
+          txt = txt.replaceAll("at", "@");
+        }
+        EmailRec = txt.toString().replaceAll(" ", "");
+        print("email "+EmailRec.toString());
         if (RegExp(r'\S+@\S+\.\S+').hasMatch(EmailRec.toString())) {
-          switch(_currentLocaleId){
-          case 'ar_SA':
-              speak("اختر نوعًا من هذه القائمة قل 1 إذا كانت الشكوى من نوع الإدارة 2 إذا كانت من نوع البناء الفوضوي 3 إذا كانت من نوع الإضاءة العامة 4 إذا كانت من نوع الطاقة 5 إذا كانت من المساحة الخضراء اكتب 6 التنقل 7 الصحة والنظافة 8 إذا كان من نوع آخر");
-            _insertSingleItem(
-                "اختر نوعًا من هذه القائمة قل 1 إذا كانت الشكوى من نوع الإدارة 2 إذا كانت من نوع البناء الفوضوي 3 إذا كانت من نوع الإضاءة العامة 4 إذا كانت من نوع الطاقة 5 إذا كانت من المساحة الخضراء اكتب 6 التنقل 7 الصحة والنظافة 8 إذا كان من نوع آخر",
-                MessageType.Receiver,
-                DateFormat("HH:mm").format(DateTime.now()));
-            
+            _currentLocaleId='ar_SA';
+          switch (_currentLocaleId) {
+            case 'ar_SA':
+          
+              _voiceBot(
+                  "اختر نوعًا من هذه القائمة قل 1 إذا كانت الشكوى من نوع الإدارة 2 إذا كانت من نوع البناء الفوضوي 3 إذا كانت من نوع الإضاءة العامة 4 إذا كانت من نوع الطاقة 5 إذا كانت من المساحة الخضراء اكتب 6 التنقل 7 الصحة والنظافة 8 إذا كان من نوع آخر");
+              
+
               break;
-              case 'fr_CA':
-       speak("Choisir un type parmi cette liste dire 1 si la réclamation de type administration 2 si de type construction anarchique 3 si de type éclairage publique 4 si de type énergie 5 si de type espace verts 6 mobilité 7 santé et hiégiéne et 8 si c est une autre type");
-          _insertSingleItem("Choisir un type parmi cette liste dire 1 si la réclamation de type administration 2 si de type construction anarchique 3 si de type éclairage publique 4 si de type énergie 5 si de type espace verts 6 mobilité 7 santé et hiégiéne et 8 si c est un autre type", MessageType.Receiver,
-              DateFormat("HH:mm").format(DateTime.now()));
+            case 'fr_CA':
+              _voiceBot(
+                  "Choisir un type parmi cette liste dire 1 si la réclamation de type administration 2 si de type construction anarchique 3 si de type éclairage publique 4 si de type énergie 5 si de type espace verts 6 mobilité 7 santé et hiégiéne et 8 si c est une autre type");
+              
               break;
-              case 'en_US':
-                 speak("Choose a type from this list say 1 if the complaint is of the administration type 2 if of the anarchic construction type 3 if of the public lighting type 4 if of the energy type 5 if of the green space type 6 mobility 7 health and hygiene and 8 if it is another kind");
-            _insertSingleItem(
-                "Choose a type from this list say 1 if the complaint is of the administration type 2 if of the anarchic construction type 3 if of the public lighting type 4 if of the energy type 5 if of the green space type 6 mobility 7 health and hygiene and 8 if it is another kind",
-                MessageType.Receiver,
-                DateFormat("HH:mm").format(DateTime.now()));
+            case 'en_US':
+              _voiceBot(
+                  "Choose a type from this list say 1 if the complaint is of the administration type 2 if of the anarchic construction type 3 if of the public lighting type 4 if of the energy type 5 if of the green space type 6 mobility 7 health and hygiene and 8 if it is another kind");
+             
               break;
-           }
-           
-        
+          }
+
           v = 6;
         } else {
           switch (_currentLocaleId) {
             case 'ar_SA':
-                    speak("البريد الإلكتروني غير صالح حاول مرة أخرى");
-          _insertSingleItem("البريد الإلكتروني غير صالح حاول مرة أخرى", MessageType.Receiver,
-              DateFormat("HH:mm").format(DateTime.now()));
+              _voiceBot("البريد الإلكتروني غير صالح حاول مرة أخرى");
+             
               break;
-               case 'fr_CA':
-               speak("email non valide réessayer");
-          _insertSingleItem("email non valide réessayer", MessageType.Receiver,
-              DateFormat("HH:mm").format(DateTime.now()));
+            case 'fr_CA':
+              _voiceBot("email non valide réessayer");
+             
               break;
-               case 'en_US':
-                    speak("invalid email try again");
-          _insertSingleItem("invalid email try again", MessageType.Receiver,
-              DateFormat("HH:mm").format(DateTime.now()));
-              break;
+            case 'en_US':
+              _voiceBot("invalid email try again");
             
+              break;
           }
-         
         }
         break;
-          case 6:
-        if (txt.toString().contains('1')) {
-
+      case 6:
+        if ((txt.toString().contains('1')) || (txt.toString().contains('واحد'))) {
           type = "administration";
-        }
-        else  if (txt.toString().contains('2')) {
+        } else if ((txt.toString().contains('2')) || (txt.toString().contains('اثنين'))){
           type = "construction anarchiques";
-        }
-         else  if (txt.toString().contains('3')) {
+        } else if ((txt.toString().contains('3'))|| (txt.toString().contains('ثلاثه'))) {
           type = "Eclairage publique";
-        }
-         else  if (txt.toString().contains('4')) {
+        } else if ((txt.toString().contains('4'))|| (txt.toString().contains('اربعه'))) {
           type = "Energie";
-        }
-         else  if (txt.toString().contains('5')) {
+        } else if ((txt.toString().contains('5'))|| (txt.toString().contains('خمسه'))) {
           type = "Espaces Verts";
-        }
-         else  if (txt.toString().contains('6')) {
+        } else if ((txt.toString().contains('6'))|| (txt.toString().contains('سته'))) {
           type = "Mobilité";
-        }
-         else  if (txt.toString().contains('7')) {
+        } else if ((txt.toString().contains('7'))|| (txt.toString().contains('سبعه'))) {
           type = "Santé et Higiéne";
-        }
-         else  if (txt.toString().contains('8')) {
+        } else if ((txt.toString().contains('8'))|| (txt.toString().contains('ثمانيه')) ){
           type = "Autres Réclamations ";
         }
-        
-              switch (_currentLocaleId) {
-            case 'ar_SA':
-               speak("من فضلك أرسل لي وصفا موجزا لشكواك");
-          _insertSingleItem("من فضلك أرسل لي وصفا موجزا لشكواك", MessageType.Receiver,
-              DateFormat("HH:mm").format(DateTime.now()));  
-              break;
-               case 'fr_CA':
-          speak("Merci de m envoyer une petite description de votre réclamation");
-          _insertSingleItem("Merci de m envoyer une petite description de votre réclamation", MessageType.Receiver,
-              DateFormat("HH:mm").format(DateTime.now()));     
-              break;
-               case 'en_US':
-               speak("Please send me a short description of your complaint");
-          _insertSingleItem("Please send me a short description of your complaint", MessageType.Receiver,
-              DateFormat("HH:mm").format(DateTime.now()));  
-              break;
-              }
-          
-         
-          v = 7;
-         
-        break;
-          case 7:
-        DescRec = txt;
-        if (DescRec is String && DescRec.toString().trim().length>10){
+        else{
+        switch (_currentLocaleId) {
+          case 'ar_SA':
+            _voiceBot("نوع غير معروف حاول مرة أخرى");
+       
+            break;
+          case 'fr_CA':
+            _voiceBot(
+                "Type non connue réessayer");
            
-              switch (_currentLocaleId) {
-            case 'ar_SA':
-               speak("تم تسجيل طلب الشكوى");
-          _insertSingleItem("تم تسجيل طلب الشكوى", MessageType.Receiver,
-              DateFormat("HH:mm").format(DateTime.now()));
-              break;
-               case 'fr_CA':
-               speak("Demande de réclamation enregistré");
-          _insertSingleItem("Demande de réclamation enregistré", MessageType.Receiver,
-              DateFormat("HH:mm").format(DateTime.now()));
-              break;
-               case 'en_US':
-               speak("Complaint request registered");
-          _insertSingleItem("Complaint request registered", MessageType.Receiver,
-              DateFormat("HH:mm").format(DateTime.now()));
-              break;
-              }
+            break;
+          case 'en_US':
+            _voiceBot("Unknown type try again");
+           
+            break;
+        }  
+        }
+
+        switch (_currentLocaleId) {
+          case 'ar_SA':
+            _voiceBot("من فضلك أرسل لي وصفا موجزا لشكواك");
+           
+            break;
+          case 'fr_CA':
+            _voiceBot(
+                "Merci de m envoyer une petite description de votre réclamation");
+            
+            break;
+          case 'en_US':
+            _voiceBot("Please send me a short description of your complaint");
+            break;
+        }
+
+        v = 7;
+
+        break;
+      case 7:
+        DescRec = txt;
+         print("description "+DescRec.toString());
+        if (DescRec is String && DescRec.toString().trim().length > 10) {
+          
+        ajoutRecVoiceBot();
+        _createPDF();
           print("nom " +
               NomRec.toString() +
               " prenom " +
@@ -684,50 +699,149 @@ String? type;
               " email " +
               EmailRec.toString() +
               " adr " +
-              AdrRec.toString()+
+              AdrRec.toString() +
               " type " +
-              type.toString()
-              + " description "+ DescRec.toString()); 
-          
+              type.toString() +
+              " description " +
+              DescRec.toString());
+
           // v = 8;
-        }
-         else{
-              switch (_currentLocaleId) {
+        } else {
+          switch (_currentLocaleId) {
             case 'ar_SA':
-                 speak("قل وصفا صحيحا");
-          _insertSingleItem("قل وصفا صحيحا", MessageType.Receiver,
-              DateFormat("HH:mm").format(DateTime.now()));
+              _voiceBot("قل وصفا صحيحا");
+              
               break;
-               case 'fr_CA':
-                 speak("Dire une correcte description");
-          _insertSingleItem("Dire une correcte description", MessageType.Receiver,
-              DateFormat("HH:mm").format(DateTime.now()));
+            case 'fr_CA':
+              _voiceBot("Dire une correcte description");
+            
               break;
-               case 'en_US':
-                 speak("Say a correct description");
-          _insertSingleItem("Say a correct description", MessageType.Receiver,
-              DateFormat("HH:mm").format(DateTime.now()));
+            case 'en_US':
+              _voiceBot("Say a correct description");
+             
               break;
-              }
           }
+        }
         break;
-      // case 8:
-      //   print("demande enregisté");
-      //   print("nom " +
-      //       NomRec.toString() +
-      //       " prenom " +
-      //       PrenomRec.toString() +
-      //       " cin " +
-      //       cinRec.toString() +
-      //       // " email " +
-      //       // EmailRec.toString() +
-      //       " adr " +
-      //       AdrRec.toString());
-      //   break;
+   case 8:
+             String num_rec='';
+            if (txt.toString() != ""){
+               num_rec=txt;
+    if(num_rec.contains('صفر')){
+    num_rec=num_rec.replaceAll('صفر', '0');
+   }
+     if(num_rec.contains('واحد')){
+    num_rec=num_rec.replaceAll('واحد', '1');
+   }
+     if(num_rec.contains('اثنين')){
+    num_rec=num_rec.replaceAll('اثنين', '2');
+   }
+     if(num_rec.contains('ثلاثه')){
+    num_rec=num_rec.replaceAll('ثلاثه', '3');
+   }
+     if(num_rec.contains('اربعه')){
+    num_rec=num_rec.replaceAll('اربعه', '4');
+   }
+     if(num_rec.contains('خمسه')){
+    num_rec=num_rec.replaceAll('خمسه', '5');
+   }
+     if(num_rec.contains('سته')){
+    num_rec=num_rec.replaceAll('سته', '6');
+   }
+     if(num_rec.contains('سبعه')){
+    num_rec=num_rec.replaceAll('سبعه', '7');
+   }
+     if(num_rec.contains('ثمانيه')){
+    num_rec=num_rec.replaceAll('ثمانيه', '8');
+   }
+      if(num_rec.contains('تسعه')){
+    num_rec=num_rec.replaceAll('تسعه', '9');
+   }
+
+       num_rec=num_rec.replaceAll(' ', '');
+      // num_rec=txt.toString().replaceAll(' ', '');
+                //    if (_currentLocaleId == "ar_SA") {
+                //     String NumRecArray = txt.split(' ');
+                //     for (var i = 0; i < NumRecArray.length; i++) {
+                //       num_rec = num_rec + getNumLet(NumRecArray[i]);
+                //     }
+                   
+                // } else {
+                //     num_rec = txt.replaceAll(' ', '');
+                // }
+               
+             
+                print("je suis la");
+                
+                print("nummm "+num_rec);
+                if (num_rec.length == 8) {
+                    SuiviRec(num_rec);
+                }
+                else {
+                    _voiceBot("Revérifier");
+                }
+            }
+            
+            break;
     }
   }
- 
+ getNumLet(s) {
+    if(s.toString().contains('صفر')){
+    s= s.toString().replaceAll('صفر', '0');
+   }
+     if(s.toString().contains('واحد')){
+    s= s.toString().replaceAll('واحد', '1');
+   }
+     if(s.toString().contains('اثنين')){
+    s= s.toString().replaceAll('اثنين', '2');
+   }
+     if(s.toString().contains('ثلاثه')){
+    s= s.toString().replaceAll('ثلاثه', '3');
+   }
+     if(s.toString().contains('اربعه')){
+    s= s.toString().replaceAll('اربعه', '4');
+   }
+     if(s.toString().contains('خمسه')){
+    s= s.toString().replaceAll('خمسه', '5');
+   }
+     if(s.toString().contains('سته')){
+    s= s.toString().replaceAll('سته', '6');
+   }
+     if(s.toString().contains('سبعه')){
+    s= s.toString().replaceAll('سبعه', '7');
+   }
+     if(s.toString().contains('ثمانيه')){
+    s= s.toString().replaceAll('ثمانيه', '8');
+   }
+      if(s.toString().contains('تسعه')){
+    s= s.toString().replaceAll('تسعه', '9');
+   }
+  //  s=s..toString().replaceAll(' ', '');
+//  
 
+    // switch (s) {
+    //     case 'واحد':
+    //         return 1;
+    //     case 'اثنين':
+    //         return 2;
+    //     case 'ثلاثه':
+    //         return 3;
+    //     case 'اربعه':
+    //         return 4;
+    //     case 'خمسه':
+    //         return 5;
+    //     case 'سته':
+    //         return 6;
+    //     case 'سبعه':
+    //         return 7;
+    //     case 'ثمانيه':
+    //         return 8;
+    //     case 'تسعه':
+    //         return 9;
+    //     case 'صفر':
+    //         return 0;
+    // }
+}
   void _insertSingleItem(String message, MessageType type, String time) {
     vocalMessage.add(VocalMessage(message: message, type: type, time: time));
     _listKey.currentState!.insertItem(vocalMessage.length - 1,
@@ -740,4 +854,222 @@ String? type;
       );
     });
   }
+  //consommation api
+  Future SuiviRec(numrec) async {
+    String apiurl =
+        "http://192.168.1.7:8080/work/consommation%20api/suiviRec.php"; //api url
+    //dont use http://localhost , because emulator don't get that address
+    //insted use your local IP address or use live URL
+    //hit "ipconfig" in windows or "ip a" in linux to get you local IP
+
+    var response = await http.post(Uri.parse(apiurl), body: {
+      'num_rec': numrec, //get the username text
+    });
+    print(response.body);
+    if (response.statusCode == 200) {
+      var jsondata = json.decode(response.body);
+      if (jsondata["error"]) {
+        setState(() {
+          error = true;
+          print(jsondata["message"]);
+         _voiceBot("Numéro pas trouvé ");
+        });
+      } else {
+        if (jsondata["success"]) {
+          setState(() {
+            error = false;
+            print(jsondata["message"]);
+             switch (_currentLocaleId) {
+            case 'ar_SA':
+                    switch(jsondata['status']){
+                        case "0":
+                            _voiceBot("السيد او السيدة  "+jsondata['last_name'] +' '+ jsondata['first_name']+" تم تسليم مطالبتك ولكن لم تتم معالجتها بعد ");
+                            break;
+                            case "1":
+                                _voiceBot("السيد او السيدة  "+jsondata['last_name'] +' '+ jsondata['first_name']+" شكواك قيد المعالجة ");
+                            break;
+                            case "2":
+                                _voiceBot("السيد او السيدة  "+jsondata['last_name'] +' '+ jsondata['first_name']+" تم حل شكواك ");
+                            break;
+                    }
+             
+              break;
+            case 'fr_CA':
+             switch(jsondata['status']){
+                        case "0":
+                            _voiceBot("Monsieur ou Madame "+jsondata['last_name'] +' '+ jsondata['first_name']+" votre réclamation est delivré mais pas encore traité ");
+                            break;
+                            case "1":
+                                _voiceBot("Monsieur ou Madame "+jsondata['last_name'] +' '+ jsondata['first_name']+" votre réclamation est en cours de traitement ");
+                            break;
+                            case "2":
+                                _voiceBot("Monsieur ou Madame "+jsondata['last_name'] +' '+ jsondata['first_name']+" votre réclamation est résolu ");
+                            break;
+              }
+              break;
+            case 'en_US':
+            switch(jsondata['status']){
+                        case "0":
+                            _voiceBot("Mr or Mrs "+jsondata['last_name'] +' '+ jsondata['first_name']+" your claim is delivered but not yet processed ");
+                            break;
+                            case "1":
+                                _voiceBot("Mr or Mrs "+jsondata['last_name'] +' '+ jsondata['first_name']+" your complaint is being processed ");
+                            break;
+                            case "2":
+                                _voiceBot("Mr or Mrs "+jsondata['last_name'] +' '+ jsondata['first_name']+" your complaint is resolved ");
+                            break;
+                    }
+       
+          }
+          });
+        } else {
+          error = true;
+          _voiceBot("Vérifier du numéro de réclamation");
+         
+        }
+      }
+    } else {
+      setState(() {
+        error = true;
+        print("Error during connecting to server.");
+      });
+    }
+  }
+   Future ajoutRecVoiceBot() async {
+             var rng = Random();
+  for (var i = 1; i < 9; i++) {
+    print(rng.nextInt(9));
+    NumRec += rng.nextInt(9).toString();  
+  }
+    print(NomRec);
+    print(PrenomRec);
+    print(EmailRec);
+    print(cinRec);
+    print(AdrRec);
+    print(type);
+    print(DescRec);
+ print(NumRec);
+    String url = "http://192.168.1.7:8080/work/consommation%20api/ajoutrec.php";
+
+    // var body2 = {};
+    var response = await http.post(Uri.parse(url), body: {
+      "nom": NomRec.toString(),
+      "prenom": PrenomRec.toString(),
+      "email": EmailRec.toString(),
+      "cin": cinRec.toString(),
+      "address": AdrRec.toString(),
+      "type": type.toString(),
+      "description": DescRec.toString(),
+      "num_rec": NumRec.toString(),
+    });
+    if (response.statusCode == 200) {
+      print('ok');
+      // var data = json.decode(response.body);
+      var jsondata = await json.decode(response.body);
+      // print(jsondata);
+      if (jsondata["error"]) {
+        print("probleme");
+        setState(() {
+          // showprogress = false; //don't show progress indicator
+          error = true;
+          print(jsondata["message"]);
+          // errormsg = jsondata["message"];
+        });
+      } else {
+        setState(() {
+          error = false;
+          print("Register succes");
+          print(jsondata["message"]);
+          NumRec='';
+        });
+        switch (_currentLocaleId) {
+            case 'ar_SA':
+              _voiceBot("تم تسجيل طلب الشكوى. يرجى تحميل الملخص الخاص بك");
+             
+              break;
+            case 'fr_CA':
+              _voiceBot("Demande de réclamation enregistré. Merci de télécharger votre décharge");
+            
+              break;
+            case 'en_US':
+              _voiceBot("Complaint request registered. Please upload your waiver");
+       
+          }
+       
+       
+      }
+    } else {
+      setState(() {
+        // showprogress = false; //don't show progress indicator
+        error = true;
+        print("Error during connecting to server.");
+      });
+  
+    }
+    
+  }
+  
+Future<void> _createPDF() async {
+    PdfDocument document = PdfDocument();
+    final page = document.pages.add();
+    final Size pageSize = page.getClientSize();
+
+    // page.graphics.drawString('Inscription autorisation de batir',
+    //     PdfStandardFont(PdfFontFamily.helvetica, 30));
+//Create a PDF page template and add header content.
+
+    page.graphics.drawImage(PdfBitmap(await _readImageData('commune.jpg')),
+        Rect.fromLTWH(0, 0, 100, 100));
+    page.graphics.drawString(
+        'Commune de  MANZEL ABDERRAHMAN \n Tel (+216) 72 570 125/ (+216) 72 571 295 \n Fax (+216) 72 570 125 \n communemenzelabderrahmen@gmail.com \n Rue El Mongi Slim 7035 menzel abdel rahmen',
+        PdfStandardFont(PdfFontFamily.helvetica, 12),
+        bounds: Rect.fromLTWH(150, 100, pageSize.width - 100, 100),
+        format: PdfStringFormat(
+            alignment: PdfTextAlignment.center,
+            lineAlignment: PdfVerticalAlignment.middle));
+    page.graphics.drawString(
+        "Ce document est votre décharge de réclamation ".toString(),
+        PdfStandardFont(PdfFontFamily.helvetica, 18),
+        bounds: Rect.fromLTWH(30, 200, pageSize.width - 100, 100),
+        format: PdfStringFormat(
+            alignment: PdfTextAlignment.center,
+            lineAlignment: PdfVerticalAlignment.middle));
+    page.graphics.drawString("Monsieur/madame ".toString(),
+        PdfStandardFont(PdfFontFamily.helvetica, 18),
+        bounds: Rect.fromLTWH(-100, 230, pageSize.width - 100, 200),
+        format: PdfStringFormat(
+            alignment: PdfTextAlignment.center,
+            lineAlignment: PdfVerticalAlignment.middle));
+
+    page.graphics.drawString(
+        "$NomRec $PrenomRec votre réclation de type $type est bien enregistrée "
+            .toString(),
+        PdfStandardFont(PdfFontFamily.helvetica, 18),
+        bounds: Rect.fromLTWH(0, 320, pageSize.width - 100, 200),
+        format: PdfStringFormat(
+            alignment: PdfTextAlignment.center,
+            lineAlignment: PdfVerticalAlignment.middle));
+    page.graphics.drawString(
+        "Vous pouvez suivre votre réclamation a travers ce numéro $NumRec "
+            .toString(),
+        PdfStandardFont(PdfFontFamily.helvetica, 18),
+        bounds: Rect.fromLTWH(0, 400, pageSize.width - 100, 200),
+        format: PdfStringFormat(
+            alignment: PdfTextAlignment.center,
+            lineAlignment: PdfVerticalAlignment.middle));
+;
+
+    List<int> bytes = document.save();
+    document.dispose();
+
+    saveAndLaunchFile(bytes, '$NomRec$PrenomRec.pdf');
+    NumRec = "";
+  }
 }
+Future<Uint8List> _readImageData(String name) async {
+  final data = await rootBundle.load('assets/images/$name');
+  return data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+}
+ 
+  
+

@@ -1,5 +1,7 @@
 // ignore_for_file: deprecated_member_use
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:vocal_chat_bot/pages/chatbot.dart';
 
@@ -53,7 +55,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
- 
+ String NumRec='';
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -69,12 +71,14 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Icon(Icons.chat),
         backgroundColor: Colors.red[900],
         onPressed: () {
+         
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => ChatDetailPage()),
           );
         },
       ),
+      
                
                       
                      

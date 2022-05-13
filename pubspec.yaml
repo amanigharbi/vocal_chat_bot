@@ -40,7 +40,10 @@ dependencies:
   flutter_speed_dial:  
   flag: ^6.0.0
   wave: ^0.2.0
-
+  mysql1: ^0.19.2
+  syncfusion_flutter_pdf: ^20.1.52-beta
+  universal_html: 
+  open_file: ^3.2.1
  
 
 dev_dependencies:
@@ -55,6 +58,7 @@ dev_dependencies:
   carousel_pro: ^1.0.0
   introduction_screen: any
   intl: ^0.17.0
+  http:
 
 
   # The "flutter_lints" package below contains a set of recommended lints to
