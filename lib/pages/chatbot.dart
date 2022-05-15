@@ -1,13 +1,15 @@
 // ignore: import_of_legacy_library_into_null_safe
 // ignore_for_file: deprecated_member_use
 import 'dart:convert';
-import 'dart:ffi';
 import 'dart:math';
 import 'dart:typed_data';
+import 'dart:io';
+
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+// import 'package:printing/printing.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:vocal_chat_bot/components/chat_bubble.dart';
@@ -26,6 +28,13 @@ import 'package:vocal_chat_bot/pages/mysql.dart';
 import 'package:http/http.dart' as http;
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'mobile.dart' if (dart.library.html) 'web.dart';
+
+
+// import 'package:pdf/pdf.dart';
+// import 'package:pdf/widgets.dart' as pw;
+
+
+
 
 enum MessageType {
   // ignore: constant_identifier_names
@@ -317,8 +326,8 @@ void _voiceBot(String msg){
           break;
         case 'fr_CA':
    _voiceBot("Bienvenue dans l`espace de réclamation merci d`envoyer votre nom");
-          v = 1;
 
+   v=1;
           break;
         case 'en_US':
         _voiceBot("Hello! please send me your last name");
@@ -689,7 +698,8 @@ void _voiceBot(String msg){
         if (DescRec is String && DescRec.toString().trim().length > 10) {
           
         ajoutRecVoiceBot();
-        _createPDF();
+        //  _createPDFArabe();
+        //_createPDF();
           print("nom " +
               NomRec.toString() +
               " prenom " +
@@ -949,7 +959,7 @@ void _voiceBot(String msg){
     print(type);
     print(DescRec);
  print(NumRec);
-    String url = "http://192.168.1.7:8080/work/consommation%20api/ajoutrec.php";
+    String url = "http://192.168.43.23:8080/work/consommation%20api/ajoutrec.php";
 
     // var body2 = {};
     var response = await http.post(Uri.parse(url), body: {
@@ -1008,7 +1018,22 @@ void _voiceBot(String msg){
     }
     
   }
-  
+//  Future<void> generateAndPrintArabicPdf() async {
+//   final doc = pw.Document();
+// var arabicFont =await rootBundle.load("assets/fonts/HacenTunisia.ttf");
+// var myFont = pw.Font.ttf(arabicFont);
+// String test = 'خصم عددي ';
+// doc.addPage(pw.Page(
+//       pageFormat: PdfPageFormat.a4,
+      
+//       build: (pw.Context context) {
+//         return pw.Center(
+//           child: pw.Text(test, style: pw.TextStyle(fontSize: 80,font: myFont)),
+//         ); // Center
+//       })); 
+//       await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => doc.save());
+//  }
+
 Future<void> _createPDF() async {
     PdfDocument document = PdfDocument();
     final page = document.pages.add();
@@ -1042,7 +1067,7 @@ Future<void> _createPDF() async {
             lineAlignment: PdfVerticalAlignment.middle));
 
     page.graphics.drawString(
-        "$NomRec $PrenomRec votre réclation de type $type est bien enregistrée "
+        "$NomRec $PrenomRec votre réclamaion de type $type est bien enregistrée "
             .toString(),
         PdfStandardFont(PdfFontFamily.helvetica, 18),
         bounds: Rect.fromLTWH(0, 320, pageSize.width - 100, 200),
@@ -1065,11 +1090,75 @@ Future<void> _createPDF() async {
     saveAndLaunchFile(bytes, '$NomRec$PrenomRec.pdf');
     NumRec = "";
   }
+  Future<void> _createPDFArabe() async {
+    PdfDocument document = PdfDocument();
+    final page = document.pages.add();
+    final Size pageSize = page.getClientSize();
+
+List<int> fontData = await _readData('arabic.ttf');
+    // page.graphics.drawString('Inscription autorisation de batir',
+    //     PdfStandardFont(PdfFontFamily.helvetica, 30));
+//Create a PDF page template and add header content.
+
+    page.graphics.drawImage(PdfBitmap(await _readImageData('commune.jpg')),
+        Rect.fromLTWH(0, 0, 100, 100));
+    page.graphics.drawString(
+        'Commune de  MANZEL ABDERRAHMAN \n Tel (+216) 72 570 125/ (+216) 72 571 295 \n Fax (+216) 72 570 125 \n communemenzelabderrahmen@gmail.com \n Rue El Mongi Slim 7035 menzel abdel rahmen',
+        PdfStandardFont(PdfFontFamily.helvetica, 12),
+        bounds: Rect.fromLTWH(150, 100, pageSize.width - 100, 100),
+        format: PdfStringFormat(
+            alignment: PdfTextAlignment.center,
+            lineAlignment: PdfVerticalAlignment.middle));
+    page.graphics.drawString(
+  
+        "Ce document est votre décharge de réclamation ".toString(),
+      PdfTrueTypeFont(fontData, 18),
+        bounds: Rect.fromLTWH(30, 200, pageSize.width - 100, 100),
+        format: PdfStringFormat(
+            alignment: PdfTextAlignment.center,
+            lineAlignment: PdfVerticalAlignment.middle));
+    page.graphics.drawString("Monsieur/madame ".toString(),
+        PdfStandardFont(PdfFontFamily.helvetica, 18),
+        bounds: Rect.fromLTWH(-100, 230, pageSize.width - 100, 200),
+        format: PdfStringFormat(
+            alignment: PdfTextAlignment.center,
+            lineAlignment: PdfVerticalAlignment.middle));
+
+    page.graphics.drawString(
+        "$NomRec $PrenomRec votre réclamaion de type administration est bien enregistrée "
+            .toString(),
+PdfTrueTypeFont(fontData, 18),
+        bounds: Rect.fromLTWH(0, 320, pageSize.width - 100, 200),
+        format: PdfStringFormat(
+            alignment: PdfTextAlignment.center,
+            lineAlignment: PdfVerticalAlignment.middle,
+               textDirection: PdfTextDirection.rightToLeft,
+               ));
+              
+    page.graphics.drawString(
+        "Vous pouvez suivre votre réclamation a travers ce numéro $NumRec "
+            .toString(),
+         PdfTrueTypeFont(fontData, 18),
+        bounds: Rect.fromLTWH(0, 400, pageSize.width - 100, 200),
+        format: PdfStringFormat(
+            alignment: PdfTextAlignment.center,
+            lineAlignment: PdfVerticalAlignment.middle));
+
+
+    List<int> bytes = document.save();
+    document.dispose();
+
+    saveAndLaunchFile(bytes, '$NomRec$PrenomRec.pdf');
+     NumRec = "";
+}
 }
 Future<Uint8List> _readImageData(String name) async {
   final data = await rootBundle.load('assets/images/$name');
   return data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
 }
- 
+ Future<List<int>> _readData(String name) async {
+final ByteData data = await rootBundle.load('assets/fonts/$name');
+return data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+}
   
 

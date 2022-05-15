@@ -44,6 +44,7 @@ dependencies:
   syncfusion_flutter_pdf: ^20.1.52-beta
   universal_html: 
   open_file: ^3.2.1
+  printing: ^5.9.0
  
 
 dev_dependencies:
@@ -86,6 +87,19 @@ flutter:
     - assets/svg/
     - assets/svg/wave.svg
     - assets/chatbot.png
+    - assets/fonts/
+  fonts:
+  - family: Cairo
+    fonts:
+      - asset: assets/fonts/Cairo-Regular.ttf
+
+
+  - family: Arial
+    fonts:
+      - asset: assets/fonts/Arial.ttf
+  - family: Arabic
+    fonts:
+      - asset: assets/fonts/arabic.ttf
    
 
   # An image asset can refer to one or more resolution-specific "variants", see
