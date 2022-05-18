@@ -326,7 +326,6 @@ void _voiceBot(String msg){
           break;
         case 'fr_CA':
    _voiceBot("Bienvenue dans l`espace de réclamation merci d`envoyer votre nom");
-
    v=1;
           break;
         case 'en_US':
@@ -995,15 +994,18 @@ void _voiceBot(String msg){
         switch (_currentLocaleId) {
             case 'ar_SA':
               _voiceBot("تم تسجيل طلب الشكوى. يرجى تحميل الملخص الخاص بك");
-             
+                     _createPDFArabe();
+
               break;
             case 'fr_CA':
               _voiceBot("Demande de réclamation enregistré. Merci de télécharger votre décharge");
-            
+            _createPDF();
+
               break;
             case 'en_US':
               _voiceBot("Complaint request registered. Please upload your waiver");
-       
+       _createPDF();
+
           }
        
        
@@ -1018,84 +1020,107 @@ void _voiceBot(String msg){
     }
     
   }
-//  Future<void> generateAndPrintArabicPdf() async {
-//   final doc = pw.Document();
-// var arabicFont =await rootBundle.load("assets/fonts/HacenTunisia.ttf");
-// var myFont = pw.Font.ttf(arabicFont);
-// String test = 'خصم عددي ';
-// doc.addPage(pw.Page(
-//       pageFormat: PdfPageFormat.a4,
-      
-//       build: (pw.Context context) {
-//         return pw.Center(
-//           child: pw.Text(test, style: pw.TextStyle(fontSize: 80,font: myFont)),
-//         ); // Center
-//       })); 
-//       await Printing.layoutPdf(onLayout: (PdfPageFormat format) async => doc.save());
-//  }
-
-Future<void> _createPDF() async {
+Future<void> _createPDFArabe() async {
     PdfDocument document = PdfDocument();
+
     final page = document.pages.add();
     final Size pageSize = page.getClientSize();
 
+    List<int> fontData = await _readData('arabic.ttf');
     // page.graphics.drawString('Inscription autorisation de batir',
     //     PdfStandardFont(PdfFontFamily.helvetica, 30));
 //Create a PDF page template and add header content.
 
     page.graphics.drawImage(PdfBitmap(await _readImageData('commune.jpg')),
-        Rect.fromLTWH(0, 0, 100, 100));
+        Rect.fromLTWH(400, 0, 100, 100));
     page.graphics.drawString(
-        'Commune de  MANZEL ABDERRAHMAN \n Tel (+216) 72 570 125/ (+216) 72 571 295 \n Fax (+216) 72 570 125 \n communemenzelabderrahmen@gmail.com \n Rue El Mongi Slim 7035 menzel abdel rahmen',
-        PdfStandardFont(PdfFontFamily.helvetica, 12),
-        bounds: Rect.fromLTWH(150, 100, pageSize.width - 100, 100),
+        'بلدية منزل عبد الرحمن \n هاتف (+216) 72570125 / (+216) 72571295 \n فاكس (+216) 72570125 \n communemenzelabderrahmen@gmail.com \n شارع المنجي سليم 7035 منزل عبد الرحمن',
+        PdfTrueTypeFont(fontData, 18),
+        bounds: Rect.fromLTWH(-15, 0, pageSize.width - 100, 100),
         format: PdfStringFormat(
-            alignment: PdfTextAlignment.center,
-            lineAlignment: PdfVerticalAlignment.middle));
-    page.graphics.drawString(
-        "Ce document est votre décharge de réclamation ".toString(),
-        PdfStandardFont(PdfFontFamily.helvetica, 18),
-        bounds: Rect.fromLTWH(30, 200, pageSize.width - 100, 100),
-        format: PdfStringFormat(
-            alignment: PdfTextAlignment.center,
-            lineAlignment: PdfVerticalAlignment.middle));
-    page.graphics.drawString("Monsieur/madame ".toString(),
-        PdfStandardFont(PdfFontFamily.helvetica, 18),
-        bounds: Rect.fromLTWH(-100, 230, pageSize.width - 100, 200),
-        format: PdfStringFormat(
-            alignment: PdfTextAlignment.center,
-            lineAlignment: PdfVerticalAlignment.middle));
+            alignment: PdfTextAlignment.right,
+            lineAlignment: PdfVerticalAlignment.middle,
+            textDirection: PdfTextDirection.rightToLeft));
 
     page.graphics.drawString(
-        "$NomRec $PrenomRec votre réclamaion de type $type est bien enregistrée "
-            .toString(),
-        PdfStandardFont(PdfFontFamily.helvetica, 18),
-        bounds: Rect.fromLTWH(0, 320, pageSize.width - 100, 200),
-        format: PdfStringFormat(
-            alignment: PdfTextAlignment.center,
-            lineAlignment: PdfVerticalAlignment.middle));
-    page.graphics.drawString(
-        "Vous pouvez suivre votre réclamation a travers ce numéro $NumRec "
-            .toString(),
-        PdfStandardFont(PdfFontFamily.helvetica, 18),
-        bounds: Rect.fromLTWH(0, 400, pageSize.width - 100, 200),
-        format: PdfStringFormat(
-            alignment: PdfTextAlignment.center,
-            lineAlignment: PdfVerticalAlignment.middle));
-;
+        "$NomRec $PrenomRec \n $EmailRec \n بنزرت في " +
+            DateFormat("dd/MM/yyyy").format(DateTime.now()) +
+            "".toString(),
+        PdfTrueTypeFont(fontData, 18),
 
+        // PdfStandardFont(PdfFontFamily.helvetica, 15),
+        pen: PdfPen(PdfColor(0, 0, 255), width: 0.5),
+        bounds: Rect.fromLTWH(-200, 90, pageSize.width - 100, 200),
+        format: PdfStringFormat(
+            alignment: PdfTextAlignment.right,
+            lineAlignment: PdfVerticalAlignment.middle,
+            textDirection: PdfTextDirection.rightToLeft));
+    page.graphics.drawString(
+        "  رقم الشكوى:$NumRec".toString(), PdfTrueTypeFont(fontData, 18),
+
+        // PdfStandardFont(PdfFontFamily.helvetica, 18),
+        bounds: Rect.fromLTWH(60, 180, pageSize.width - 100, 200),
+        format: PdfStringFormat(
+            alignment: PdfTextAlignment.right,
+            lineAlignment: PdfVerticalAlignment.middle,
+            textDirection: PdfTextDirection.rightToLeft));
+    // page.graphics.drawString(
+    //     "  مطالبة من نوع $typeRec".toString(), PdfTrueTypeFont(fontData, 18),
+
+    //     // PdfStandardFont(PdfFontFamily.helvetica, 18),
+    //     bounds: Rect.fromLTWH(190, 210, pageSize.width - 100, 200),
+    //     format: PdfStringFormat(
+    //         alignment: PdfTextAlignment.justify,
+    //         lineAlignment: PdfVerticalAlignment.middle,
+    //         textDirection: PdfTextDirection.rightToLeft));
+    page.graphics.drawString(
+        "  السيد ,السيدة  $NomRec $PrenomRec ,صاحب بطاقة تعريف وطنية عدد $cinRec  "
+            .toString(),
+        PdfTrueTypeFont(fontData, 18),
+        // PdfStandardFont(PdfFontFamily.helvetica, 15),
+        bounds: Rect.fromLTWH(60, 210, pageSize.width - 100, 200),
+        pen: PdfPen(PdfColor(20, 0, 255), width: 0),
+        format: PdfStringFormat(
+            alignment: PdfTextAlignment.right,
+            lineAlignment: PdfVerticalAlignment.middle,
+            textDirection: PdfTextDirection.rightToLeft));
+
+    page.graphics.drawString(
+        " \n لقد تلقينا شكواك من نوع $type.نحاول تصحيح المشكلة في أقرب وقت ممكن. \n \n يمكنك تتبع مطالبتك من خلال رقم $NumRec هذا للبقاء على اتصال مع الجميع. \n \n من فضلك استقبل ، سيدتي ، أو سيدي ، $NomRec $PrenomRec  أطيب تحياتنا."
+            .toString(),
+        PdfTrueTypeFont(fontData, 18),
+
+        // PdfStandardFont(PdfFontFamily.helvetica, 18),
+        bounds: Rect.fromLTWH(50, 280, pageSize.width - 60, 400),
+        format: PdfStringFormat(
+            alignment: PdfTextAlignment.right,
+            lineAlignment: PdfVerticalAlignment.middle,
+            textDirection: PdfTextDirection.rightToLeft));
+
+    page.graphics.drawString(
+        "http://www.commune-menzel-abderrahmen.gov.tn".toString(),
+        PdfStandardFont(
+          PdfFontFamily.helvetica,
+          12,
+        ),
+        pen: PdfPen(PdfColor(300, 0, 255), width: 0),
+        bounds: Rect.fromLTWH(30, 650, pageSize.width - 100, 200),
+        format: PdfStringFormat(
+            alignment: PdfTextAlignment.justify,
+            lineAlignment: PdfVerticalAlignment.middle));
     List<int> bytes = document.save();
+
     document.dispose();
 
     saveAndLaunchFile(bytes, '$NomRec$PrenomRec.pdf');
     NumRec = "";
   }
-  Future<void> _createPDFArabe() async {
+Future<void> _createPDF() async {
     PdfDocument document = PdfDocument();
+
     final page = document.pages.add();
     final Size pageSize = page.getClientSize();
 
-List<int> fontData = await _readData('arabic.ttf');
     // page.graphics.drawString('Inscription autorisation de batir',
     //     PdfStandardFont(PdfFontFamily.helvetica, 30));
 //Create a PDF page template and add header content.
@@ -1105,52 +1130,71 @@ List<int> fontData = await _readData('arabic.ttf');
     page.graphics.drawString(
         'Commune de  MANZEL ABDERRAHMAN \n Tel (+216) 72 570 125/ (+216) 72 571 295 \n Fax (+216) 72 570 125 \n communemenzelabderrahmen@gmail.com \n Rue El Mongi Slim 7035 menzel abdel rahmen',
         PdfStandardFont(PdfFontFamily.helvetica, 12),
-        bounds: Rect.fromLTWH(150, 100, pageSize.width - 100, 100),
+        bounds: Rect.fromLTWH(100, 0, pageSize.width - 100, 100),
         format: PdfStringFormat(
-            alignment: PdfTextAlignment.center,
+            alignment: PdfTextAlignment.justify,
             lineAlignment: PdfVerticalAlignment.middle));
+
     page.graphics.drawString(
-  
-        "Ce document est votre décharge de réclamation ".toString(),
-      PdfTrueTypeFont(fontData, 18),
-        bounds: Rect.fromLTWH(30, 200, pageSize.width - 100, 100),
+        "$NomRec $PrenomRec \n $EmailRec \n Bizerte le " +
+            DateFormat("dd/MM/yyyy").format(DateTime.now()) +
+            "".toString(),
+        PdfStandardFont(PdfFontFamily.helvetica, 15),
+        pen: PdfPen(PdfColor(0, 0, 255), width: 0.5),
+        bounds: Rect.fromLTWH(300, 90, pageSize.width - 100, 200),
         format: PdfStringFormat(
-            alignment: PdfTextAlignment.center,
+            alignment: PdfTextAlignment.justify,
             lineAlignment: PdfVerticalAlignment.middle));
-    page.graphics.drawString("Monsieur/madame ".toString(),
+    page.graphics.drawString("Numéro réclamation: $NumRec".toString(),
         PdfStandardFont(PdfFontFamily.helvetica, 18),
-        bounds: Rect.fromLTWH(-100, 230, pageSize.width - 100, 200),
+        bounds: Rect.fromLTWH(0, 180, pageSize.width - 100, 200),
         format: PdfStringFormat(
-            alignment: PdfTextAlignment.center,
+            alignment: PdfTextAlignment.justify,
+            lineAlignment: PdfVerticalAlignment.middle));
+    page.graphics.drawString("Décharge de réclamation de $type".toString(),
+        PdfStandardFont(PdfFontFamily.helvetica, 18),
+        bounds: Rect.fromLTWH(0, 210, pageSize.width - 100, 200),
+        format: PdfStringFormat(
+            alignment: PdfTextAlignment.justify,
+            lineAlignment: PdfVerticalAlignment.middle));
+    page.graphics.drawString(
+        "Monsieur/madame $NomRec $PrenomRec titulaire de cin $cinRec "
+            .toString(),
+        PdfStandardFont(PdfFontFamily.helvetica, 15),
+        bounds: Rect.fromLTWH(0, 250, pageSize.width - 100, 200),
+        pen: PdfPen(PdfColor(0, 0, 255), width: 0),
+        format: PdfStringFormat(
+            alignment: PdfTextAlignment.justify,
             lineAlignment: PdfVerticalAlignment.middle));
 
     page.graphics.drawString(
-        "$NomRec $PrenomRec votre réclamaion de type administration est bien enregistrée "
+        "Nous avons bien récu votre réclamation de type $type \n\n Nous essayons de corriger le problème dés que possible . \n\n Vous pouvez suivre votre réclamation a travers ce numéro $NumRec pour restez en contact de tous. \n\n Veuillez recevoir, Madame, ou Monsieur, $NomRec $PrenomRec nos salutations distinguées."
             .toString(),
-PdfTrueTypeFont(fontData, 18),
-        bounds: Rect.fromLTWH(0, 320, pageSize.width - 100, 200),
+        PdfStandardFont(PdfFontFamily.helvetica, 18),
+        bounds: Rect.fromLTWH(0, 300, pageSize.width - 100, 400),
         format: PdfStringFormat(
-            alignment: PdfTextAlignment.center,
-            lineAlignment: PdfVerticalAlignment.middle,
-               textDirection: PdfTextDirection.rightToLeft,
-               ));
-              
-    page.graphics.drawString(
-        "Vous pouvez suivre votre réclamation a travers ce numéro $NumRec "
-            .toString(),
-         PdfTrueTypeFont(fontData, 18),
-        bounds: Rect.fromLTWH(0, 400, pageSize.width - 100, 200),
-        format: PdfStringFormat(
-            alignment: PdfTextAlignment.center,
+            alignment: PdfTextAlignment.justify,
             lineAlignment: PdfVerticalAlignment.middle));
 
-
+    page.graphics.drawString(
+        "http://www.commune-menzel-abderrahmen.gov.tn".toString(),
+        PdfStandardFont(
+          PdfFontFamily.helvetica,
+          12,
+        ),
+        pen: PdfPen(PdfColor(0, 0, 255), width: 0),
+        bounds: Rect.fromLTWH(230, 650, pageSize.width - 100, 200),
+        format: PdfStringFormat(
+            alignment: PdfTextAlignment.justify,
+            lineAlignment: PdfVerticalAlignment.middle));
     List<int> bytes = document.save();
+
     document.dispose();
 
     saveAndLaunchFile(bytes, '$NomRec$PrenomRec.pdf');
-     NumRec = "";
-}
+    NumRec = "";
+  }
+
 }
 Future<Uint8List> _readImageData(String name) async {
   final data = await rootBundle.load('assets/images/$name');
