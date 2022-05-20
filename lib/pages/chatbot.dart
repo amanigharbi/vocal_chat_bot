@@ -9,10 +9,10 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:open_file/open_file.dart';
 // import 'package:printing/printing.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
-import 'package:vocal_chat_bot/components/chat_bubble.dart';
 import 'package:vocal_chat_bot/components/chat_detail_page.appbar.dart';
 import 'package:vocal_chat_bot/components/voice_buble.dart';
 import 'package:vocal_chat_bot/models/chat_message.dart';
@@ -23,11 +23,13 @@ import 'package:intl/intl.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flag/flag.dart';
 import 'package:vocal_chat_bot/models/vocal_message.dart';
-import 'package:cupertino_icons/cupertino_icons.dart';
-import 'package:vocal_chat_bot/pages/mysql.dart';
 import 'package:http/http.dart' as http;
 import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'mobile.dart' if (dart.library.html) 'web.dart';
+import 'package:vocal_chat_bot/models/doc_model.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+
 
 
 // import 'package:pdf/pdf.dart';
@@ -73,11 +75,14 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
   String? type;
   String NumRec='';
  bool? error;
-
+  String file = "";
+  String nameFile = "";
   @override
   void initState() {
     super.initState();
     _initSpeech();
+   allDocs();
+
   }
 
   void _initSpeech() async {
@@ -103,6 +108,7 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
       if (_speechToText.isNotListening) {
         _getResponse(result.recognizedWords);
         _resultText = result.recognizedWords;
+        print("word "+result.recognizedWords);
       }
     });
   }
@@ -224,6 +230,19 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                                 speak("مرحبا كيف يمكنني مساعدتك؟");
                               });
                             }),
+                             SpeedDialChild(
+                            child: Flag.fromCode(
+                              FlagsCode.TN,
+                              height: 30,
+                              width: 30,
+                            ),
+                            label: 'Tounsi',
+                            onTap: () {
+                              setState(() {
+                                _currentLocaleId = "ar_TN";
+                                speak("مرحبا كيف يمكنني مساعدتك؟");
+                              });
+                            }),
                         SpeedDialChild(
                             child: Flag.fromCode(
                               FlagsCode.US,
@@ -283,28 +302,45 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
   }
 
   Future<FlutterTts> speak(message) async {
+   
     switch (_currentLocaleId) {
-      case 'ar_SA':
+      case 'ar_SA' :
         await flutterTts.setLanguage("ar");
+        await flutterTts.setSpeechRate(1.0);
+  await flutterTts.setVolume(1.0);
+  await flutterTts.setPitch(1.0);
+        break;
+            case 'ar_TN' :
+        await flutterTts.setLanguage("ar");
+        await flutterTts.setSpeechRate(1.0);
+  await flutterTts.setVolume(1.0);
+  await flutterTts.setPitch(1.0);
         break;
       case 'fr_CA':
         await flutterTts.setLanguage("fr-FR");
+        await flutterTts.setSpeechRate(1.0);
+  await flutterTts.setVolume(1.0);
+  await flutterTts.setPitch(1.0);
         for (int i = 0; i < message.length; i++) {
           message = message.replaceAll('`', ' ');
         }
         break;
       case 'en_US':
         await flutterTts.setLanguage("en-US");
+        await flutterTts.setSpeechRate(1.0);
+  await flutterTts.setVolume(1.0);
+  await flutterTts.setPitch(1.0);
         break;
       
         // await flutterTts.setLanguage("fr-FR");
     }
-
+  
     await flutterTts.speak(message);
 
     return flutterTts;
   }
 void _voiceBot(String msg){
+  print("replay "+msg);
        speak(msg);
               _insertSingleItem(
                   msg,
@@ -320,6 +356,11 @@ void _voiceBot(String msg){
         txt.toString().contains("reclamation")) {
       switch (_currentLocaleId) {
         case 'ar_SA':
+        _voiceBot("مرحبا في فضاء الشكايات من فضلك ارسل لي اسم العائلة ");
+          v = 1;
+
+          break;
+             case 'ar_TN':
         _voiceBot("مرحبا في فضاء الشكايات من فضلك ارسل لي اسم العائلة ");
           v = 1;
 
@@ -355,6 +396,39 @@ void _voiceBot(String msg){
                         
                         v = 8;
                         break;
+                               case "ar_TN":
+                        _voiceBot("مرحبًا ، أرسل لي رقم المطالبة الذي تريد تتبعه");
+                        
+                        v = 8;
+                        break;
+                }
+             txt = "";
+              
+        }
+            if ((txt.toString().contains("document"))|| (txt.toString().contains("وثيقة"))) {
+           
+
+                switch (_currentLocaleId) {
+                    case "en_US":
+                        _voiceBot("hello, what is the name of the desired administrative document");
+                        _currentLocaleId ="fr_CA";
+                        v = 9;
+                        break;
+                    case "fr_CA":
+                        _voiceBot("bonjour,c`est quoi le nom du document administratif souhaité");
+                       
+                        v = 9;
+                        break;
+                    case "ar_SA":
+                        _voiceBot("مرحبًا ، ما هو اسم المستند الإداري المطلوب");
+                         _currentLocaleId ="fr_CA";
+                        v = 9;
+                        break;
+                         case "ar_TN":
+                        _voiceBot("مرحبًا ، ما هو اسم المستند الإداري المطلوب");
+                         _currentLocaleId ="fr_CA";
+                        v = 9;
+                        break;
                 }
              txt = "";
               
@@ -366,7 +440,7 @@ void _voiceBot(String msg){
             "message": txt,
           };
           var response = await Dio().post(
-            "http://192.168.1.7:5050/predict",
+            "http://192.168.43.23:5050/predict",
             options: Options(
               headers: {
                 Headers.contentTypeHeader: 'application/json',
@@ -400,6 +474,9 @@ void _voiceBot(String msg){
               
 
                 break;
+                case 'ar_TN':
+                _voiceBot("السيد/السيدة $NomRec ارسل لي اسمك");
+                break;
               case 'fr_CA':
                 _voiceBot(
                     "Monsieur/Madame $NomRec s`il vous plait envoyer moi votre prénom");
@@ -414,6 +491,10 @@ void _voiceBot(String msg){
           } else {
             switch (_currentLocaleId) {
               case 'ar_SA':
+                _voiceBot("اسم غير صحيح");
+            
+                break;
+                case 'ar_TN':
                 _voiceBot("اسم غير صحيح");
             
                 break;
@@ -439,6 +520,11 @@ void _voiceBot(String msg){
              
 
               break;
+                 case 'ar_TN':
+              _voiceBot("السيد/السيدة $PrenomRec $NomRec ارسل لي رقم بطاقة هويتك");
+             
+
+              break;
             case 'fr_CA':
               _voiceBot(
                   "Monsieur/Madame $NomRec $PrenomRec  envoyer moi votre numéro de carte d`identité");
@@ -456,6 +542,10 @@ void _voiceBot(String msg){
         } else {
           switch (_currentLocaleId) {
             case 'ar_SA':
+              _voiceBot("قل الاسم الحقيقي من فضلك");
+             
+              break;
+              case 'ar_TN':
               _voiceBot("قل الاسم الحقيقي من فضلك");
              
               break;
@@ -508,18 +598,16 @@ void _voiceBot(String msg){
       cinRec=cinRec.replaceAll(' ', '');
              
                       
-                        // String cinArray = txt.split(' ');
-                        // for (var i = 0; i < cinArray.length; i++) {
-                        //     cinRec += getNumLet(cinArray[i]);
-                        // }
-                    
-                    // else {
-                    //     cinRec = txt.replaceAll(' ', '');
-                    // }
+               
  print("cin "+cinRec.toString());
         if ((cinRec.toString().length == 8)) {
           switch (_currentLocaleId) {
             case 'ar_SA':
+              _voiceBot("عظيم الآن ما هو عنوانك");
+          
+
+              break;
+              case 'ar_TN':
               _voiceBot("عظيم الآن ما هو عنوانك");
           
 
@@ -538,6 +626,10 @@ void _voiceBot(String msg){
         } else {
           switch (_currentLocaleId) {
             case 'ar_SA':
+              _voiceBot("يجب أن يكون رقم بطاقة الهوية رقمًا يساوي 8");
+           
+              break;
+                case 'ar_TN':
               _voiceBot("يجب أن يكون رقم بطاقة الهوية رقمًا يساوي 8");
            
               break;
@@ -563,6 +655,11 @@ void _voiceBot(String msg){
               
       _currentLocaleId = 'en_US';
               break;
+               case 'ar_TN':
+              _voiceBot("ماهو بريدك الإلكتروني");
+              
+      _currentLocaleId = 'en_US';
+              break;
             case 'fr_CA':
               _voiceBot("c`est quoi Votre email ");
               
@@ -577,6 +674,10 @@ void _voiceBot(String msg){
         } else {
           switch (_currentLocaleId) {
             case 'ar_SA':
+              _voiceBot("هناك خطأ ما حاول مرة أخرى");
+            
+              break;
+              case 'ar_TN':
               _voiceBot("هناك خطأ ما حاول مرة أخرى");
             
               break;
@@ -607,6 +708,13 @@ void _voiceBot(String msg){
               
 
               break;
+                  case 'ar_TN':
+          
+              _voiceBot(
+                  "اختر نوعًا من هذه القائمة قل 1 إذا كانت الشكوى من نوع الإدارة 2 إذا كانت من نوع البناء الفوضوي 3 إذا كانت من نوع الإضاءة العامة 4 إذا كانت من نوع الطاقة 5 إذا كانت من المساحة الخضراء اكتب 6 التنقل 7 الصحة والنظافة 8 إذا كان من نوع آخر");
+              
+
+              break;
             case 'fr_CA':
               _voiceBot(
                   "Choisir un type parmi cette liste dire 1 si la réclamation de type administration 2 si de type construction anarchique 3 si de type éclairage publique 4 si de type énergie 5 si de type espace verts 6 mobilité 7 santé et hiégiéne et 8 si c est une autre type");
@@ -623,6 +731,10 @@ void _voiceBot(String msg){
         } else {
           switch (_currentLocaleId) {
             case 'ar_SA':
+              _voiceBot("البريد الإلكتروني غير صالح حاول مرة أخرى");
+             
+              break;
+                  case 'ar_TN':
               _voiceBot("البريد الإلكتروني غير صالح حاول مرة أخرى");
              
               break;
@@ -661,6 +773,10 @@ void _voiceBot(String msg){
             _voiceBot("نوع غير معروف حاول مرة أخرى");
        
             break;
+              case 'ar_TN':
+            _voiceBot("نوع غير معروف حاول مرة أخرى");
+       
+            break;
           case 'fr_CA':
             _voiceBot(
                 "Type non connue réessayer");
@@ -675,6 +791,10 @@ void _voiceBot(String msg){
 
         switch (_currentLocaleId) {
           case 'ar_SA':
+            _voiceBot("من فضلك أرسل لي وصفا موجزا لشكواك");
+           
+            break;
+             case 'ar_TN':
             _voiceBot("من فضلك أرسل لي وصفا موجزا لشكواك");
            
             break;
@@ -718,6 +838,10 @@ void _voiceBot(String msg){
         } else {
           switch (_currentLocaleId) {
             case 'ar_SA':
+              _voiceBot("قل وصفا صحيحا");
+              
+              break;
+              case 'ar_TN':
               _voiceBot("قل وصفا صحيحا");
               
               break;
@@ -787,10 +911,89 @@ void _voiceBot(String msg){
                     SuiviRec(num_rec);
                 }
                 else {
-                    _voiceBot("Revérifier");
+                  switch (_currentLocaleId) {
+                    case 'ar_SA':
+              _voiceBot("حاول مرة اخرى");
+              
+              break;
+              case 'ar_TN':
+              _voiceBot("حاول مرة اخرى");
+              
+              break;
+            case 'fr_CA':
+              _voiceBot("Revérifier");
+            
+              break;
+            case 'en_US':
+              _voiceBot("Recheck");
+             
+              break;
+          }
                 }
             }
             
+            break;
+
+            case 9 :
+             
+        if (txt.toString() != "") {
+          docName = txt.toString().replaceAll("é", "e");
+          print("docName "+docName.toString());
+             DocumentsList.forEach((documents) async {
+            if (documents.name.contains(docName!)) {
+              filteredListDoc.add(documents);
+              nameFile = documents.name;
+              file = 'http://192.168.43.23:8000/storage/${documents.file}';
+            }
+          });
+        
+          
+          print("doc ok "+nameFile);
+          if (nameFile.isNotEmpty) {
+            // ignore: unnecessary_this
+            switch (_currentLocaleId) {
+ case 'ar_SA':
+              _voiceBot("سيتم تنزيل المستند الخاص بك");
+              
+              break;
+              case 'ar_TN':
+              _voiceBot("سيتم تنزيل المستند الخاص بك");
+              
+              break;
+            case 'fr_CA':
+              _voiceBot("votre document va étre téléchargé");
+            
+              break;
+            case 'en_US':
+              _voiceBot("your document will be downloaded");
+             
+              break;
+          }   
+            // file = 'http://192.168.1.17/baladiya-app-web/${documents.file}';
+            await Future.delayed(Duration(seconds: 1));
+
+            launch(file);
+          } else {
+            switch (_currentLocaleId) {
+           
+              case "en_US":
+            _voiceBot("document with this name could not be found");
+                break;
+              case "ar_SA":
+            _voiceBot("تعذر العثور على المستند بهذا الاسم");
+                break;
+                     case "ar_TN":
+            _voiceBot("تعذر العثور على المستند بهذا الاسم");
+                break;
+              case "fr_CA":
+            _voiceBot("document avec ce nom est introuvable");
+                break;
+            }
+          }
+        }
+        file = "";
+        nameFile = "";
+        break;
             break;
     }
   }
@@ -825,31 +1028,7 @@ void _voiceBot(String msg){
       if(s.toString().contains('تسعه')){
     s= s.toString().replaceAll('تسعه', '9');
    }
-  //  s=s..toString().replaceAll(' ', '');
-//  
-
-    // switch (s) {
-    //     case 'واحد':
-    //         return 1;
-    //     case 'اثنين':
-    //         return 2;
-    //     case 'ثلاثه':
-    //         return 3;
-    //     case 'اربعه':
-    //         return 4;
-    //     case 'خمسه':
-    //         return 5;
-    //     case 'سته':
-    //         return 6;
-    //     case 'سبعه':
-    //         return 7;
-    //     case 'ثمانيه':
-    //         return 8;
-    //     case 'تسعه':
-    //         return 9;
-    //     case 'صفر':
-    //         return 0;
-    // }
+ 
 }
   void _insertSingleItem(String message, MessageType type, String time) {
     vocalMessage.add(VocalMessage(message: message, type: type, time: time));
@@ -866,7 +1045,7 @@ void _voiceBot(String msg){
   //consommation api
   Future SuiviRec(numrec) async {
     String apiurl =
-        "http://192.168.1.7:8080/work/consommation%20api/suiviRec.php"; //api url
+        "http://192.168.43.23:8080/work/consommation%20api/suiviRec.php"; //api url
     //dont use http://localhost , because emulator don't get that address
     //insted use your local IP address or use live URL
     //hit "ipconfig" in windows or "ip a" in linux to get you local IP
@@ -890,6 +1069,20 @@ void _voiceBot(String msg){
             print(jsondata["message"]);
              switch (_currentLocaleId) {
             case 'ar_SA':
+                    switch(jsondata['status']){
+                        case "0":
+                            _voiceBot("السيد او السيدة  "+jsondata['last_name'] +' '+ jsondata['first_name']+" تم تسليم مطالبتك ولكن لم تتم معالجتها بعد ");
+                            break;
+                            case "1":
+                                _voiceBot("السيد او السيدة  "+jsondata['last_name'] +' '+ jsondata['first_name']+" شكواك قيد المعالجة ");
+                            break;
+                            case "2":
+                                _voiceBot("السيد او السيدة  "+jsondata['last_name'] +' '+ jsondata['first_name']+" تم حل شكواك ");
+                            break;
+                    }
+             
+              break;
+                 case 'ar_TN':
                     switch(jsondata['status']){
                         case "0":
                             _voiceBot("السيد او السيدة  "+jsondata['last_name'] +' '+ jsondata['first_name']+" تم تسليم مطالبتك ولكن لم تتم معالجتها بعد ");
@@ -997,6 +1190,11 @@ void _voiceBot(String msg){
                      _createPDFArabe();
 
               break;
+               case 'ar_TN':
+              _voiceBot("تم تسجيل طلب الشكوى. يرجى تحميل الملخص الخاص بك");
+                     _createPDFArabe();
+
+              break;
             case 'fr_CA':
               _voiceBot("Demande de réclamation enregistré. Merci de télécharger votre décharge");
             _createPDF();
@@ -1019,6 +1217,54 @@ void _voiceBot(String msg){
   
     }
     
+  }
+    String? docName;
+  // consomation api liste documents
+  List<Documents> DocumentsList = [];
+  late Future<List<Documents>> futureDoc;
+  late List<Documents> filteredListDoc = [];
+  TextEditingController controllerDoc = new TextEditingController();
+  final ScrollController _listScrollControllerDoc = new ScrollController();
+
+  sendDoc(String text) async {
+    DocumentsList.forEach((documents) {
+      if (documents.name.contains(text)) {
+        _insertSingleItem(documents.toString(), MessageType.Receiver,
+            DateFormat("HH:mm").format(DateTime.now()));
+      } else {
+        _voiceBot("Document introuvable");
+      }
+    });
+
+    setState(() {});
+  }
+
+  Future<List<Documents>> allDocs() async {
+    final response = await http.get(Uri.parse(
+        "http://192.168.43.23:8080/work/consommation%20api/viewAllDocuments.php"));
+    if (response.statusCode == 200) {
+      final items = json.decode(response.body).cast<Map<String, dynamic>>();
+
+      DocumentsList = items.map<Documents>((json) {
+        return Documents.fromJson(json);
+      }).toList();
+
+      return DocumentsList;
+    }
+    //   final parsed = json.decode(response.body).cast<Map<String, dynamic>>();
+    //   return parsed.map<Documents>((json) => Documents.fromMap(json)).toList();
+    // }
+    else {
+      throw Exception('Failed to load album');
+    }
+  }
+   // open pdf
+  Future<void> launchFile(List<int> bytes, String fileName) async {
+    final path = (await getExternalStorageDirectory())!.path;
+
+    final file = File('$path/$fileName');
+    await file.writeAsBytes(bytes, flush: true);
+    OpenFile.open('$path/$fileName');
   }
 Future<void> _createPDFArabe() async {
     PdfDocument document = PdfDocument();
