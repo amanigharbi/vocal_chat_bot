@@ -351,9 +351,9 @@ void _voiceBot(String msg){
   Future<void> _getResponse(txt) async {
     _insertSingleItem(
         txt, MessageType.Sender, DateFormat("HH:mm").format(DateTime.now()));
-    if (txt.toString().contains("réclamation") ||
-        txt.toString().contains("شكوى") ||
-        txt.toString().contains("reclamation")) {
+    if (txt.toString().contains("ajouter réclamation") ||
+        txt.toString().contains("نعدي شكوى") ||
+        txt.toString().contains("reclamation") || (txt.toString().contains("اضافه شكوى")) || (txt.toString().contains("complaint")) ){
       switch (_currentLocaleId) {
         case 'ar_SA':
         _voiceBot("مرحبا في فضاء الشكايات من فضلك ارسل لي اسم العائلة ");
@@ -376,8 +376,8 @@ void _voiceBot(String msg){
       }
       txt = "";
     }
-       if ((txt.toString().contains("suivi"))|| (txt.toString().contains("اتباع"))
-        || (txt.toString().contains("check"))) {
+       if ((txt.toString().contains("suivi réclamation"))|| (txt.toString().contains("اتباع الشكوى"))
+        || (txt.toString().contains("check")) || (txt.toString().contains("وين وصلت الشكوى"))) {
            
            
                 switch (_currentLocaleId) {
@@ -412,22 +412,22 @@ void _voiceBot(String msg){
                     case "en_US":
                         _voiceBot("hello, what is the name of the desired administrative document");
                         _currentLocaleId ="fr_CA";
-                        v = 9;
+                        v = 10;
                         break;
                     case "fr_CA":
                         _voiceBot("bonjour,c`est quoi le nom du document administratif souhaité");
                        
-                        v = 9;
+                        v = 10;
                         break;
                     case "ar_SA":
                         _voiceBot("مرحبًا ، ما هو اسم المستند الإداري المطلوب");
                          _currentLocaleId ="fr_CA";
-                        v = 9;
+                        v = 10;
                         break;
                          case "ar_TN":
                         _voiceBot("مرحبًا ، ما هو اسم المستند الإداري المطلوب");
                          _currentLocaleId ="fr_CA";
-                        v = 9;
+                        v = 10;
                         break;
                 }
              txt = "";
@@ -440,7 +440,7 @@ void _voiceBot(String msg){
             "message": txt,
           };
           var response = await Dio().post(
-            "http://192.168.43.23:5050/predict",
+            "http://192.168.1.7:5050/predict",
             options: Options(
               headers: {
                 Headers.contentTypeHeader: 'application/json',
@@ -857,41 +857,41 @@ void _voiceBot(String msg){
         }
         break;
    case 8:
-             String num_rec='';
+           
             if (txt.toString() != ""){
-               num_rec=txt;
-    if(num_rec.contains('صفر')){
-    num_rec=num_rec.replaceAll('صفر', '0');
+               NumRec=txt;
+    if(NumRec.contains('صفر')){
+    NumRec=NumRec.replaceAll('صفر', '0');
    }
-     if(num_rec.contains('واحد')){
-    num_rec=num_rec.replaceAll('واحد', '1');
+     if(NumRec.contains('واحد')){
+    NumRec=NumRec.replaceAll('واحد', '1');
    }
-     if(num_rec.contains('اثنين')){
-    num_rec=num_rec.replaceAll('اثنين', '2');
+     if(NumRec.contains('اثنين')){
+    NumRec=NumRec.replaceAll('اثنين', '2');
    }
-     if(num_rec.contains('ثلاثه')){
-    num_rec=num_rec.replaceAll('ثلاثه', '3');
+     if(NumRec.contains('ثلاثه')){
+    NumRec=NumRec.replaceAll('ثلاثه', '3');
    }
-     if(num_rec.contains('اربعه')){
-    num_rec=num_rec.replaceAll('اربعه', '4');
+     if(NumRec.contains('اربعه')){
+    NumRec=NumRec.replaceAll('اربعه', '4');
    }
-     if(num_rec.contains('خمسه')){
-    num_rec=num_rec.replaceAll('خمسه', '5');
+     if(NumRec.contains('خمسه')){
+    NumRec=NumRec.replaceAll('خمسه', '5');
    }
-     if(num_rec.contains('سته')){
-    num_rec=num_rec.replaceAll('سته', '6');
+     if(NumRec.contains('سته')){
+    NumRec=NumRec.replaceAll('سته', '6');
    }
-     if(num_rec.contains('سبعه')){
-    num_rec=num_rec.replaceAll('سبعه', '7');
+     if(NumRec.contains('سبعه')){
+    NumRec=NumRec.replaceAll('سبعه', '7');
    }
-     if(num_rec.contains('ثمانيه')){
-    num_rec=num_rec.replaceAll('ثمانيه', '8');
+     if(NumRec.contains('ثمانيه')){
+    NumRec=NumRec.replaceAll('ثمانيه', '8');
    }
-      if(num_rec.contains('تسعه')){
-    num_rec=num_rec.replaceAll('تسعه', '9');
+      if(NumRec.contains('تسعه')){
+    NumRec=NumRec.replaceAll('تسعه', '9');
    }
 
-       num_rec=num_rec.replaceAll(' ', '');
+       NumRec=NumRec.replaceAll(' ', '');
       // num_rec=txt.toString().replaceAll(' ', '');
                 //    if (_currentLocaleId == "ar_SA") {
                 //     String NumRecArray = txt.split(' ');
@@ -906,9 +906,30 @@ void _voiceBot(String msg){
              
                 print("je suis la");
                 
-                print("nummm "+num_rec);
-                if (num_rec.length == 8) {
-                    SuiviRec(num_rec);
+                print("nummm "+NumRec);
+                if (NumRec.length == 8) {
+                    switch (_currentLocaleId) {
+                    case "en_US":
+                        _voiceBot("Hi send me your card identity number");
+                        
+                        v = 9;
+                        break;
+                    case "fr_CA":
+                        _voiceBot("Salut envoyez moi votre numéro de carte d`identité");
+                       
+                        v = 9;
+                        break;
+                    case "ar_SA":
+                        _voiceBot("مرحبًا ، أرسل لي رقم بطاقة هويتك");
+                        
+                        v = 9;
+                        break;
+                               case "ar_TN":
+                        _voiceBot("مرحبًا ، أرسل لي رقم بطاقة هويتك");
+                        
+                        v = 9;
+                        break;
+                }
                 }
                 else {
                   switch (_currentLocaleId) {
@@ -933,17 +954,97 @@ void _voiceBot(String msg){
             }
             
             break;
+  case 9:
+            
+            if (txt.toString() != ""){
+              
+   
+      // cinRec=txt.toString().replaceAll(' ', '');
+      //              if ((_currentLocaleId == "ar_SA") || (_currentLocaleId == "ar_TN")) {
+      //               String CinRecArray = txt.split(' ');
+      //               for (var i = 0; i < CinRecArray.length; i++) {
+      //                 cinRec = cinRec + getNumLet(CinRecArray[i]);
+      //               }
+                   
+      //           } else {
+      //               cinRec = txt.replaceAll(' ', '');
+      //           }
+                 cinRec=txt;
+    if(cinRec.contains('صفر')){
+    cinRec=cinRec.replaceAll('صفر', '0');
+   }
+     if(cinRec.contains('واحد')){
+    cinRec=cinRec.replaceAll('واحد', '1');
+   }
+     if(cinRec.contains('اثنين')){
+    cinRec=cinRec.replaceAll('اثنين', '2');
+   }
+     if(cinRec.contains('ثلاثه')){
+    cinRec=cinRec.replaceAll('ثلاثه', '3');
+   }
+     if(cinRec.contains('اربعه')){
+    cinRec=cinRec.replaceAll('اربعه', '4');
+   }
+     if(cinRec.contains('خمسه')){
+    cinRec=cinRec.replaceAll('خمسه', '5');
+   }
+     if(cinRec.contains('سته')){
+    cinRec=cinRec.replaceAll('سته', '6');
+   }
+     if(cinRec.contains('سبعه')){
+    cinRec=cinRec.replaceAll('سبعه', '7');
+   }
+     if(cinRec.contains('ثمانيه')){
+    cinRec=cinRec.replaceAll('ثمانيه', '8');
+   }
+      if(cinRec.contains('تسعه')){
+    cinRec=cinRec.replaceAll('تسعه', '9');
+   }
 
-            case 9 :
+       cinRec=cinRec.replaceAll(' ', '');
+             
+                print("je suis la");
+                
+                print("nummm "+cinRec);
+                if (cinRec.length == 8) {
+            SuiviRec(NumRec,cinRec);
+                }
+                else {
+                  switch (_currentLocaleId) {
+                    case 'ar_SA':
+              _voiceBot("حاول مرة اخرى");
+              
+              break;
+              case 'ar_TN':
+              _voiceBot("حاول مرة اخرى");
+              
+              break;
+            case 'fr_CA':
+              _voiceBot("Revérifier");
+            
+              break;
+            case 'en_US':
+              _voiceBot("Recheck");
+             
+              break;
+          }
+                }
+            }
+            
+            break;
+            case 10 :
              
         if (txt.toString() != "") {
           docName = txt.toString().replaceAll("é", "e");
           print("docName "+docName.toString());
+           print("list "+DocumentsList.toString());
              DocumentsList.forEach((documents) async {
+               print("docccc "+documents.name.toString());
             if (documents.name.contains(docName!)) {
+              print("dkhalt");
               filteredListDoc.add(documents);
               nameFile = documents.name;
-              file = 'http://192.168.43.23:8000/storage/${documents.file}';
+              file = 'http://192.168.1.7:8000/storage/${documents.file}';
             }
           });
         
@@ -1043,15 +1144,16 @@ void _voiceBot(String msg){
     });
   }
   //consommation api
-  Future SuiviRec(numrec) async {
+  Future SuiviRec(numrec,cin) async {
     String apiurl =
-        "http://192.168.43.23:8080/work/consommation%20api/suiviRec.php"; //api url
+        "http://192.168.1.7:8080/work/consommation%20api/suiviRec.php"; //api url
     //dont use http://localhost , because emulator don't get that address
     //insted use your local IP address or use live URL
     //hit "ipconfig" in windows or "ip a" in linux to get you local IP
 
     var response = await http.post(Uri.parse(apiurl), body: {
-      'num_rec': numrec, //get the username text
+      'num_rec': numrec,
+      'cin':cin, //get the username text
     });
     print(response.body);
     if (response.statusCode == 200) {
@@ -1241,7 +1343,7 @@ void _voiceBot(String msg){
 
   Future<List<Documents>> allDocs() async {
     final response = await http.get(Uri.parse(
-        "http://192.168.43.23:8080/work/consommation%20api/viewAllDocuments.php"));
+        "http://192.168.1.7:8080/work/consommation%20api/viewAllDocuments.php"));
     if (response.statusCode == 200) {
       final items = json.decode(response.body).cast<Map<String, dynamic>>();
 
