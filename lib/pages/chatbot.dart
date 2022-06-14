@@ -2289,7 +2289,7 @@ void verifAutoBatir(String txt){
              txt = "";
               
         }
-        if ((txt.toString().contains("réseau public")) || (txt.toString().contains("شبكة عامة"))||
+        if ((txt.toString().contains("réseau public")) || (txt.toString().contains("شبكه عامه"))||
          (txt.toString().contains("public network")) || (txt.toString().contains("ماء وضوء")))
             {
                 switch (_currentLocaleId) {
@@ -2342,7 +2342,7 @@ void verifAutoBatir(String txt){
                 }
              txt = "";  
             }
-              if ((txt.toString().contains("autorisation bâtir"))|| (txt.toString().contains(" رخصه بناء")) || (txt.toString().contains("رخصة"))||
+              if ((txt.toString().contains("autorisation bâtir"))|| (txt.toString().contains("رخصه بناء")) || (txt.toString().contains("رخصة"))||
          (txt.toString().contains("permit")))
             {
                 switch (_currentLocaleId) {
@@ -2664,7 +2664,6 @@ void verifAutoBatir(String txt){
                             NomAutor = jsondata["first_name"].toString();
                   PrenomAutor = jsondata["last_name"].toString();
                   AdrAutor = jsondata["adresse"];
-                                    commentaire = jsondata["commentaire"];
 
                   if (NomAutor.toString().contains(RegExp(r'[A-Z,a-z]'))) {
                     _createPDFfrAccord();
@@ -2680,9 +2679,9 @@ void verifAutoBatir(String txt){
                   commentaire = jsondata["response"];
 
                   if (NomAutor.toString().contains(RegExp(r'[A-Z,a-z]'))) {
-                    _createPDFfrRejet();
+                    _createPDFfrRejet(commentaire);
                   } else {
-                    _createPDFArabeRefusBatir();
+                    _createPDFArabeRefusBatir(commentaire);
                   }
             
                             break;
@@ -2703,7 +2702,6 @@ void verifAutoBatir(String txt){
                                  NomAutor = jsondata["first_name"].toString();
                   PrenomAutor = jsondata["last_name"].toString();
                   AdrAutor = jsondata["adresse"];
-                                    commentaire = jsondata["commentaire"];
 
                   if (NomAutor.toString().contains(RegExp(r'[A-Z,a-z]'))) {
                     _createPDFfrAccord();
@@ -2716,12 +2714,12 @@ void verifAutoBatir(String txt){
                              NomAutor = jsondata["last_name"];
                   PrenomAutor = jsondata["first_name"];
                   AdrAutor = jsondata["adresse"];
-                  commentaire = jsondata["commentaire"];
+                  commentaire = jsondata["response"];
 
                   if (NomAutor.toString().contains(RegExp(r'[A-Z,a-z]'))) {
-                    _createPDFfrRejet();
+                    _createPDFfrRejet(commentaire);
                   } else {
-                    _createPDFArabeRefusBatir();
+                    _createPDFArabeRefusBatir(commentaire);
                   }  
                             break;
                     }
@@ -2740,7 +2738,6 @@ void verifAutoBatir(String txt){
                              NomAutor = jsondata["first_name"].toString();
                   PrenomAutor = jsondata["last_name"].toString();
                   AdrAutor = jsondata["adresse"];
-                                    commentaire = jsondata["commentaire"];
 
                   if (NomAutor.toString().contains(RegExp(r'[A-Z,a-z]'))) {
                     _createPDFfrAccord();
@@ -2753,12 +2750,12 @@ void verifAutoBatir(String txt){
                              NomAutor = jsondata["last_name"];
                   PrenomAutor = jsondata["first_name"];
                   AdrAutor = jsondata["adresse"];
-                  commentaire = jsondata["commentaire"];
+                  commentaire = jsondata["response"];
 
                   if (NomAutor.toString().contains(RegExp(r'[A-Z,a-z]'))) {
-                    _createPDFfrRejet();
+                    _createPDFfrRejet(commentaire);
                   } else {
-                    _createPDFArabeRefusBatir();
+                    _createPDFArabeRefusBatir(commentaire);
                   }
                             break;
               }
@@ -2788,12 +2785,12 @@ void verifAutoBatir(String txt){
                                  NomAutor = jsondata["last_name"];
                   PrenomAutor = jsondata["first_name"];
                   AdrAutor = jsondata["adresse"];
-                  commentaire = jsondata["commentaire"];
+                  commentaire = jsondata["response"];
 
                   if (NomAutor.toString().contains(RegExp(r'[A-Z,a-z]'))) {
-                    _createPDFfrRejet();
+                    _createPDFfrRejet(commentaire);
                   } else {
-                    _createPDFArabeRefusBatir();
+                    _createPDFArabeRefusBatir(commentaire);
                   }
                                 break;
                     }
@@ -3917,7 +3914,7 @@ Future<void> _createPDF(String NumRec) async {
 
 // rejet demande fr
 // accord fr
-  Future<void> _createPDFfrRejet() async {
+  Future<void> _createPDFfrRejet(String commentaire) async {
     PdfDocument document = PdfDocument();
 
     final page = document.pages.add();
@@ -3985,7 +3982,13 @@ Future<void> _createPDF(String NumRec) async {
         format: PdfStringFormat(
             alignment: PdfTextAlignment.justify,
             lineAlignment: PdfVerticalAlignment.middle));
-
+ page.graphics.drawString("Pour les raisons suivantes: \n $commentaire ",
+        PdfStandardFont(PdfFontFamily.helvetica, 13),
+        bounds: Rect.fromLTWH(0, 320, pageSize.width - 60, 200),
+        pen: PdfPen(PdfColor(0, 0, 0), width: 0),
+        format: PdfStringFormat(
+            alignment: PdfTextAlignment.justify,
+            lineAlignment: PdfVerticalAlignment.middle));
     page.graphics.drawString(
         "Menzel Abderrahman le" +
             DateFormat("dd/MM/yyyy").format(DateTime.now()) +
@@ -4141,7 +4144,7 @@ Future<void> _createPDF(String NumRec) async {
   }
 
 // Refus demande d'autorsation de batir
-  Future<void> _createPDFArabeRefusBatir() async {
+  Future<void> _createPDFArabeRefusBatir(String commentaire) async {
     PdfDocument document = PdfDocument();
 
     final page = document.pages.add();
